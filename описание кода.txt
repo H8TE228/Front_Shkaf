@@ -1,0 +1,7 @@
+Общего контейнера нет, поэтому в роли контейнера СЕКЦИЯ.
+пример - <section className="mx-auto flex h-8 w-full max-w-[1550px] items-center justify-start px-6 lg:px-0"></section>
+  Важно:
+  -mx-auto
+  -max-w
+  -px-6 
+  -lg:px-0
