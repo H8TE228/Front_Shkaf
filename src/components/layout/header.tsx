@@ -27,7 +27,7 @@ export function Header() {
           <button
             onClick={() => navigate("/points")}
             type="button"
-            className="text-foreground flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors hover:text-black"
+            className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
           >
             <Map className="size-6" />
             <span className="hidden sm:block">Пункты</span>
@@ -35,7 +35,7 @@ export function Header() {
           <button
             onClick={() => navigate("/articles")}
             type="button"
-            className="text-foreground flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors hover:text-black"
+            className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
           >
             <Newspaper className="size-6" />
             <span className="hidden sm:block">Статьи</span>
@@ -43,7 +43,7 @@ export function Header() {
           <button
             onClick={() => navigate("/login")}
             type="button"
-            className="text-foreground flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors hover:text-black"
+            className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
           >
             <UserRound className="size-6" />
             <span className="hidden sm:block">Войти</span>

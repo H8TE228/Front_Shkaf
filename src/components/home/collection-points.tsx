@@ -2,8 +2,8 @@ import { collectionPoints, mapImage } from "@/constants";
 
 export function CollectionPoints() {
   return (
-    <section className="border-border bg-card mx-auto mt-16 grid h-90 w-full max-w-[1550px] grid-cols-1 overflow-hidden rounded-2xl border px-6 lg:grid-cols-[7fr_5fr] lg:px-0">
-      <div className="bg-secondary relative min-w-0 overflow-hidden">
+    <section className="border-border bg-card mx-auto mt-16 grid h-auto w-full max-w-[1550px] grid-cols-1 overflow-hidden rounded-2xl border px-6 lg:h-90 lg:grid-cols-[7fr_5fr] lg:px-0">
+      <div className="bg-secondary relative h-80 min-w-0 overflow-hidden shadow-lg lg:h-auto">
         <img
           className="size-full object-cover grayscale dark:brightness-75 dark:invert"
           src={mapImage}

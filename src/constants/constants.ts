@@ -1,8 +1,9 @@
-import type { HomeItem, CollectionPoint } from "@/types";
 import shelterScene from "@/assets/images/hero-shelter-scene.webp";
 import cityMap from "@/assets/images/ekaterinburg-map.png";
 
-export const homeItems: HomeItem[] = [
+export const STORAGE_KEY_LOCATION = "user-location";
+
+export const homeItems = [
   {
     id: "overall",
     title: "Зимний комбинезон",
@@ -68,7 +69,7 @@ export const heroScene = {
 
 export const mapImage = cityMap;
 
-export const collectionPoints: CollectionPoint[] = [
+export const collectionPoints = [
   {
     id: "p1",
     name: "Пункт в центре",

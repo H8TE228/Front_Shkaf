@@ -29,12 +29,6 @@ export function LoginPage() {
           <span className="text-primary -mt-2 text-right text-sm leading-5">
             Не помню пароль
           </span>
-          {/* <button
-            type="button"
-            className="bg-primary text-primary-foreground h-12 w-full rounded-xl text-base font-medium"
-          >
-            Войти
-          </button> */}
           <Button
             type="button"
             className="left-1/2 h-12 text-base font-semibold"

@@ -6,7 +6,7 @@ import { Card, CardContent } from "../ui/card";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ProductCard({ product }: { product: any }) {
   return (
-    <Card className="min-w-0 cursor-pointer gap-3 overflow-visible bg-transparent p-4 shadow-none ring-0 transition-shadow hover:shadow">
+    <Card className="min-w-0 cursor-pointer gap-3 overflow-visible bg-transparent p-4 shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow">
       <div className="border-border bg-muted relative aspect-square overflow-hidden rounded-[14px] border">
         <div className="text-muted-foreground flex size-full items-center justify-center">
           <Camera className="size-12 stroke-[1.5]" />
