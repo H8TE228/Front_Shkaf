@@ -10,7 +10,7 @@ export function Catalog() {
       </h1>
       <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {homeItems.map((item) => (
-          <ProductCard item={item} key={item.id} />
+          <ProductCard product={item} key={item.id} />
         ))}
       </div>
       <Button

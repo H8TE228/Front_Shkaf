@@ -13,15 +13,16 @@ export function Hero() {
         <div className="relative z-10 min-w-0">
           <Button
             type="button"
-            className="bg-primary hover:bg-primary/80 text-primary-foreground absolute bottom-8 left-1/2 h-12 w-70 -translate-x-1/2 rounded-full text-base font-semibold"
+            className="dark:text-foreground absolute bottom-8 left-1/2 h-12 w-70 -translate-x-1/2 text-base font-semibold dark:bg-[#0e6f73] dark:hover:bg-[#0e6f73]/80"
           >
             Отдать вещь
           </Button>
         </div>
         <div className="relative z-10 min-w-0">
           <Button
+            variant="defaultWhite"
             type="button"
-            className="hover:bg-card/80 bg-card text-primary absolute bottom-8 left-1/2 h-12 w-70 -translate-x-1/2 rounded-full text-base font-semibold"
+            className="absolute bottom-8 left-1/2 h-12 w-70 -translate-x-1/2 rounded-full text-base font-semibold"
           >
             Найти вещь
           </Button>
