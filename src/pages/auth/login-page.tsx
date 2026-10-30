@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export function LoginPage() {
   return (
@@ -38,7 +39,10 @@ export function LoginPage() {
         </div>
 
         <p className="text-muted-foreground mt-6 text-center text-sm leading-5">
-          Нет аккаунта? <span className="text-primary">Зарегистрироваться</span>
+          Нет аккаунта?{" "}
+          <Link to="/register" className="text-primary">
+            Зарегистрироваться
+          </Link>
         </p>
       </div>
     </section>
