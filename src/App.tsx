@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "@/components";
-import { ErrorPage, HomePage, LoginPage } from "@/pages";
+import { ErrorPage, HomePage, LoginPage, RegisterPage } from "@/pages";
 
 function App() {
   const router = createBrowserRouter([
@@ -9,11 +9,11 @@ function App() {
       children: [
         { path: "/", Component: HomePage },
         { path: "/login", Component: LoginPage },
+        { path: "/register", Component: RegisterPage },
         {
           path: "*",
           Component: ErrorPage,
         },
-        // { path: "/register", Component: RegisterPage },
 
         // {
         //   element: <PublicRoute />,
