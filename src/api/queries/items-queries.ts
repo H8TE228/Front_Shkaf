@@ -31,8 +31,8 @@ export const itemsQueries = {
     return res.data;
   },
 
-  createItemPhoto: async (id: string) => {
-    const res = await api.post<TItemPhoto>(`/items/${id}/photo`, {
+  createItemPhoto: async (id: string, photoData: FormData) => {
+    const res = await api.post<TItemPhoto>(`/items/${id}/photo`, photoData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
