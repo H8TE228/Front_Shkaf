@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { authQueries } from "@/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryClient } from "@/lib";
+import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 export function useLogin() {
-  const queryClient = useQueryClient();
-
   return useMutation<any, AxiosError<any>, { email: string; password: string }>(
     {
       mutationFn: (data: { email: string; password: string }) =>

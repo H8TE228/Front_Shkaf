@@ -1,4 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { QueryClient } from "@tanstack/react-query";
+
 export { cn } from "cn";
+
+export const queryClient = new QueryClient();
 
 interface ICoordinates {
   latitude: number;

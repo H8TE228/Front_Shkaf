@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@/api";
-import type { TUser } from "@/types";
+import type { TRegisterRequest, TUser } from "@/types";
 
 export const authQueries = {
-  register: async (email: string, password: string) => {
+  register: async (data: TRegisterRequest) => {
     const res = await api.post<
       Pick<TUser, "id" | "email" | "username" | "created_at">
     >("/users/register", {
-      email,
-      password,
+      ...data,
     });
     return res.data;
   },
@@ -28,11 +27,6 @@ export const authQueries = {
 
   refresh: async () => {
     const res = await api.post<void>("/users/login/refresh");
-    return res.data;
-  },
-
-  me: async () => {
-    const res = await api.get<TUser>("/me");
     return res.data;
   },
 };

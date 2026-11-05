@@ -1,27 +1,25 @@
-import axios from "axios";
-// import { authQueries } from "./queries/admin-queries";
-import { queryClient } from "@/main";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 import { authQueries } from "./queries";
+import { queryClient } from "@/lib";
 
-let isRefreshing = false;
-type QueuedRequest = {
-  resolve: () => void;
-  reject: (error: unknown) => void;
+type RetryableRequest = InternalAxiosRequestConfig & {
+  _retry?: boolean;
 };
 
-let queue: QueuedRequest[] = [];
+let refreshPromise: Promise<void> | null = null;
 
-const processQueue = (error?: unknown) => {
-  queue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-      return;
-    }
+function refreshAccessToken(): Promise<void> {
+  if (!refreshPromise) {
+    refreshPromise = authQueries
+      .refresh()
+      .then(() => undefined)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
 
-    resolve();
-  });
-  queue = [];
-};
+  return refreshPromise;
+}
 
 function forceLogout() {
   queryClient.setQueryData(["me"], null);
@@ -37,57 +35,41 @@ export const api = axios.create({
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) {
+      throw error;
+    }
+
+    const originalRequest = error.config as RetryableRequest | undefined;
+
+    if (!originalRequest || error.response?.status !== 401) {
+      throw error;
+    }
+
+    const url = originalRequest.url;
 
     if (
-      !originalRequest ||
-      error.response?.status !== 401 ||
-      originalRequest._retry
+      url === "/users/login" ||
+      url === "/users/register" ||
+      url === "/users/login/refresh"
     ) {
-      return Promise.reject(error);
+      throw error;
     }
 
-    if (originalRequest.url === "/users/login/refresh") {
-      forceLogout();
-      return Promise.reject(error);
-    }
-
-    if (originalRequest.url === "/users/login") {
-      return Promise.reject(error);
-    }
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        queue.push({
-          resolve: () => {
-            resolve(api(originalRequest));
-          },
-          reject,
-        });
-      });
+    if (originalRequest._retry) {
+      throw error;
     }
 
     originalRequest._retry = true;
-    isRefreshing = true;
 
     try {
-      console.log("трай рефреша");
-      await authQueries.refresh();
-
-      processQueue();
+      await refreshAccessToken();
 
       return api(originalRequest);
-    } catch (err) {
-      console.log("ошибка при рефреше", err);
-      processQueue(err);
-
+    } catch (refreshError) {
       forceLogout();
-
-      return Promise.reject(err);
-    } finally {
-      console.log("рефреш завершен");
-      isRefreshing = false;
+      throw refreshError;
     }
   },
 );

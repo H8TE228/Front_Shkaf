@@ -1,5 +1,5 @@
 import { authQueries } from "@/api";
-import { queryClient } from "@/main";
+import { queryClient } from "@/lib";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
