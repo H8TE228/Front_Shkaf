@@ -1,12 +1,25 @@
 import axios from "axios";
-// import { adminQueries } from "./queries/admin-queries";
+// import { authQueries } from "./queries/admin-queries";
 import { queryClient } from "@/main";
+import { authQueries } from "./queries";
 
 let isRefreshing = false;
-let queue: Array<() => void> = [];
+type QueuedRequest = {
+  resolve: () => void;
+  reject: (error: unknown) => void;
+};
 
-const processQueue = () => {
-  queue.forEach((cb) => cb());
+let queue: QueuedRequest[] = [];
+
+const processQueue = (error?: unknown) => {
+  queue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+      return;
+    }
+
+    resolve();
+  });
   queue = [];
 };
 
@@ -27,14 +40,30 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      !originalRequest ||
+      error.response?.status !== 401 ||
+      originalRequest._retry
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (originalRequest.url === "/users/login/refresh") {
+      forceLogout();
+      return Promise.reject(error);
+    }
+
+    if (originalRequest.url === "/users/login") {
       return Promise.reject(error);
     }
 
     if (isRefreshing) {
-      return new Promise((resolve) => {
-        queue.push(() => {
-          resolve(api(originalRequest));
+      return new Promise((resolve, reject) => {
+        queue.push({
+          resolve: () => {
+            resolve(api(originalRequest));
+          },
+          reject,
         });
       });
     }
@@ -44,15 +73,14 @@ api.interceptors.response.use(
 
     try {
       console.log("трай рефреша");
-      // await adminQueries.refresh();
+      await authQueries.refresh();
 
       processQueue();
 
       return api(originalRequest);
     } catch (err) {
-      console.log("ошибка при рефреше");
-      console.log(err);
-      queue = [];
+      console.log("ошибка при рефреше", err);
+      processQueue(err);
 
       forceLogout();
 

@@ -2,9 +2,11 @@ import { Map, Newspaper, Search, UserRound } from "lucide-react";
 import { Input } from "../ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { LocationButton } from "../location-button";
+import { useMe } from "@/hooks";
 
 export function Header() {
   const navigate = useNavigate();
+  const { data: isAuth } = useMe();
 
   return (
     <header className="border-border bg-header-background sticky top-0 z-20 h-20 border-b px-0 backdrop-blur-sm lg:px-12">
@@ -41,12 +43,18 @@ export function Header() {
             <span className="hidden sm:block">Статьи</span>
           </button>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => {
+              if (isAuth) {
+                navigate("/profile");
+              } else {
+                navigate("/login");
+              }
+            }}
             type="button"
             className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
           >
             <UserRound className="size-6" />
-            <span className="hidden sm:block">Войти</span>
+            <span className="hidden sm:block">Профиль</span>
           </button>
         </nav>
       </div>

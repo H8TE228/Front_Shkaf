@@ -15,6 +15,9 @@ export function ProductCard({ product }: { product: any }) {
           {product.condition}
         </Badge>
         <Button
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+          }}
           type="button"
           variant="ghost"
           size="icon"

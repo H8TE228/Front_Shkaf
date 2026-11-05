@@ -1,46 +1,50 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Layout } from "@/components";
-import { ErrorPage, HomePage, LoginPage, RegisterPage } from "@/pages";
+import { Layout, ProtectedRoute, PublicRoute } from "@/components";
+import {
+  ErrorPage,
+  HomePage,
+  LoginPage,
+  ProfilePage,
+  RegisterPage,
+} from "@/pages";
+import { useMe } from "./hooks";
+
+const router = createBrowserRouter([
+  {
+    Component: Layout,
+    children: [
+      { path: "/", Component: HomePage },
+      { path: "*", Component: ErrorPage },
+      {
+        element: <PublicRoute />,
+        children: [
+          { path: "/login", Component: LoginPage },
+          { path: "/register", Component: RegisterPage },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/profile",
+            Component: ProfilePage,
+          },
+        ],
+      },
+    ],
+  },
+]);
 
 function App() {
-  const router = createBrowserRouter([
-    {
-      Component: Layout,
-      children: [
-        { path: "/", Component: HomePage },
-        { path: "/login", Component: LoginPage },
-        { path: "/register", Component: RegisterPage },
-        {
-          path: "*",
-          Component: ErrorPage,
-        },
+  console.log("Первый вызов useMe");
+  const { data: user } = useMe();
 
-        // {
-        //   element: <PublicRoute />,
-        //   children: [
-        //     {
-        //       path: "/admin/login",
-        //       Component: AdminLoginPage,
-        //     },
-        //     {
-        //       path: "/login",
-        //       Component: LoginPage,
-        //     },
-        //   ],
-        // },
+  if (user) {
+    console.log(
+      `Данные авторизованного пользователя: id: ${user.id}, username: ${user.username}`,
+    );
+  }
 
-        // {
-        //   element: <ProtectedRoute />,
-        //   children: [
-        //     {
-        //       path: "/admin",
-        //       Component: AdminPage,
-        //     },
-        //   ],
-        // },
-      ],
-    },
-  ]);
   return <RouterProvider router={router} />;
 }
 

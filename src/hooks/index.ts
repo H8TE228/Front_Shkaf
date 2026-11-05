@@ -1,2 +1,2 @@
-export * from "./hooks";
-export * from "./use-theme";
+export * from "./theme/use-theme";
+export * from "./auth";
