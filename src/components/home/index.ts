@@ -1,4 +1,4 @@
-export * from "./catalog";
+export * from "./recomendations";
 export * from "./hero";
 export * from "./collection-points";
-export * from "./product-card";
+export * from "../item-card";

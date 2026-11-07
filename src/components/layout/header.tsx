@@ -21,6 +21,7 @@ export function Header() {
         <div className="bg-muted relative hidden h-12 flex-1 rounded-xl sm:block">
           <Search className="text-muted-foreground pointer-events-none absolute top-3 left-4 size-6" />
           <Input
+            id="header-search"
             className="placeholder:text-muted-foreground size-full rounded-xl border-0 py-0 pr-4 pl-11 text-sm outline-none"
             placeholder="Найти нужную вещь"
           />

@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout, ProtectedRoute, PublicRoute } from "@/components";
 import {
+  CatalogPage,
   ErrorPage,
   HomePage,
   LoginPage,
@@ -14,7 +15,10 @@ const router = createBrowserRouter([
     Component: Layout,
     children: [
       { path: "/", Component: HomePage },
+      { path: "/catalog", Component: CatalogPage },
+      // { path: "/item/:id", Component: ItemPage },
       { path: "*", Component: ErrorPage },
+
       {
         element: <PublicRoute />,
         children: [
@@ -22,6 +26,7 @@ const router = createBrowserRouter([
           { path: "/register", Component: RegisterPage },
         ],
       },
+
       {
         element: <ProtectedRoute />,
         children: [

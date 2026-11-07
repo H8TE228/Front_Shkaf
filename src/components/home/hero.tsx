@@ -2,6 +2,10 @@ import { heroScene } from "@/constants";
 import { Button } from "../ui/button";
 
 export function Hero() {
+  // не хочется использовать контекст или пробрасывать пропсы
+  const searchInput =
+    document.querySelector<HTMLInputElement>("#header-search");
+
   return (
     <section className="mx-auto w-full max-w-[1550px] px-0">
       <div className="bg-muted relative grid h-132 grid-cols-2 overflow-hidden rounded-b-2xl">
@@ -22,6 +26,7 @@ export function Hero() {
           <Button
             variant="defaultWhite"
             type="button"
+            onClick={() => searchInput?.focus()}
             className="absolute bottom-8 left-1/2 h-12 w-70 -translate-x-1/2 rounded-full text-base font-semibold"
           >
             Найти вещь
