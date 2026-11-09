@@ -1,8 +1,8 @@
-import { Map, Newspaper, Search, UserRound } from "lucide-react";
-import { Input } from "../ui/input";
+import { Map, Newspaper, PackageSearch, UserRound } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { LocationButton } from "../location-button";
 import { useMe } from "@/hooks";
+import { InputSearch } from "../input-search";
 
 export function Header() {
   const navigate = useNavigate();
@@ -18,15 +18,16 @@ export function Header() {
           Добрый Шкаф
         </Link>
         <LocationButton />
-        <div className="bg-muted relative hidden h-12 flex-1 rounded-xl sm:block">
-          <Search className="text-muted-foreground pointer-events-none absolute top-3 left-4 size-6" />
-          <Input
-            id="header-search"
-            className="placeholder:text-muted-foreground size-full rounded-xl border-0 py-0 pr-4 pl-11 text-sm outline-none"
-            placeholder="Найти нужную вещь"
-          />
-        </div>
+        <InputSearch />
         <nav className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3">
+          <button
+            onClick={() => navigate("/catalog")}
+            type="button"
+            className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
+          >
+            <PackageSearch className="size-6" />
+            <span className="hidden sm:block">Каталог</span>
+          </button>
           <button
             onClick={() => navigate("/points")}
             type="button"

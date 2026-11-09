@@ -6,5 +6,6 @@ export function useExchangePoints(params?: TExchangePointsQueryParams) {
   return useQuery({
     queryKey: ["exchangePoints", params],
     queryFn: () => exchangePointsQueries.getExchangePoints(params),
+    staleTime: Infinity,
   });
 }
