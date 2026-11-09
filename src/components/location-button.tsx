@@ -2,11 +2,14 @@ import { MapPin } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { getCityFromCoordinates } from "@/lib";
-import { STORAGE_KEY_LOCATION } from "@/constants";
+import {
+  STORAGE_KEY_LOCATION,
+  STORAGE_KEY_USER_LOCATION_UPDATED_EVENT,
+} from "@/constants";
 
 interface ILocationData {
-  latitude: number;
   longitude: number;
+  latitude: number;
   city: string;
 }
 
@@ -37,13 +40,13 @@ export function LocationButton() {
           const { latitude, longitude } = coords;
 
           const city = await getCityFromCoordinates({
-            latitude,
             longitude,
+            latitude,
           });
 
           const newLocation: ILocationData = {
-            latitude,
             longitude,
+            latitude,
             city: city ?? "Неизвестный город",
           };
 
@@ -51,6 +54,9 @@ export function LocationButton() {
           localStorage.setItem(
             STORAGE_KEY_LOCATION,
             JSON.stringify(newLocation),
+          );
+          window.dispatchEvent(
+            new Event(STORAGE_KEY_USER_LOCATION_UPDATED_EVENT),
           );
         } catch (error) {
           console.error("Не удалось определить город:", error);

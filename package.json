@@ -8,7 +8,8 @@
     "dev:host": "vite --host",
     "build": "bun -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "schema": "bunx openapi-typescript http://localhost:8000/api/v1/schema/ -o src/api/schema.d.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -38,6 +39,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "@yandex/ymaps3-types": "^1.0.21772363",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",

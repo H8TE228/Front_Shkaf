@@ -4,9 +4,11 @@ import {
   CatalogPage,
   ErrorPage,
   HomePage,
+  ItemPage,
   LoginPage,
   ProfilePage,
   RegisterPage,
+  ArticlesPage,
 } from "@/pages";
 import { useMe } from "./hooks";
 
@@ -16,7 +18,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/", Component: HomePage },
       { path: "/catalog", Component: CatalogPage },
-      // { path: "/item/:id", Component: ItemPage },
+      { path: "/item/:id", Component: ItemPage },
+      { path: "/articles", Component: ArticlesPage },
       { path: "*", Component: ErrorPage },
 
       {

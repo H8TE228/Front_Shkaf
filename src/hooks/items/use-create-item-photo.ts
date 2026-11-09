@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { itemsQueries } from "@/api";
 import { queryClient } from "@/lib";
 import type { TItemPhoto } from "@/types";
@@ -8,7 +7,7 @@ import type { AxiosError } from "axios";
 export function useCreateItemPhoto() {
   return useMutation<
     TItemPhoto,
-    AxiosError<any>,
+    AxiosError,
     { id: string; photoData: FormData }
   >({
     mutationFn: ({ id, photoData }) =>

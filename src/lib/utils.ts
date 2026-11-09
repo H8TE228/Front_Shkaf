@@ -1,40 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryClient } from "@tanstack/react-query";
-
-export { cn } from "cn";
 
 export const queryClient = new QueryClient();
 
-interface ICoordinates {
-  latitude: number;
-  longitude: number;
-}
+export function getCurrentDay() {
+  const daysOfWeek: { [key: number]: string } = {
+    0: "sun",
+    1: "mon",
+    2: "tue",
+    3: "wed",
+    4: "thu",
+    5: "fri",
+    6: "sat",
+  };
 
-export async function getCityFromCoordinates({
-  latitude,
-  longitude,
-}: ICoordinates): Promise<string | null> {
-  const params = new URLSearchParams({
-    apikey: import.meta.env.VITE_YANDEX_MAPS_API_KEY,
-    geocode: `${longitude},${latitude}`,
-    format: "json",
-    results: "1",
-  });
+  const day = new Date().getDay();
 
-  const response = await fetch(`https://geocode-maps.yandex.ru/v1/?${params}`);
-
-  if (!response.ok) {
-    throw new Error(`Ошибка геокодера: ${response.status}`);
-  }
-
-  const data: any = await response.json();
-
-  const components =
-    data.response?.GeoObjectCollection?.featureMember?.[0]?.GeoObject
-      ?.metaDataProperty?.GeocoderMetaData?.Address?.Components;
-
-  return (
-    components?.find((component: any) => component.kind === "locality")?.name ??
-    null
-  );
+  return daysOfWeek[day];
 }

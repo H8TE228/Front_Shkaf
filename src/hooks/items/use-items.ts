@@ -1,9 +1,11 @@
 import { itemsQueries } from "@/api";
+import type { TItemsQueryParams } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
-export function useItems() {
+export function useItems(params?: TItemsQueryParams) {
   return useQuery({
-    queryKey: ["items"],
-    queryFn: itemsQueries.getItems,
+    queryKey: ["items", params],
+    queryFn: () => itemsQueries.getItems(params),
+    staleTime: Infinity,
   });
 }

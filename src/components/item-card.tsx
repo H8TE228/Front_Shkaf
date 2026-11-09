@@ -5,7 +5,6 @@ import { Card, CardContent } from "./ui/card";
 import type { TItem } from "@/types";
 import { useNavigate } from "react-router-dom";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TItemCardProps = {
   item: TItem;
 };
@@ -15,7 +14,7 @@ export function ItemCard({ item: item }: TItemCardProps) {
 
   return (
     <Card
-      onClick={() => navigate(`/items/${item.id}`)}
+      onClick={() => navigate(`/item/${item.id}`)}
       className="min-w-0 cursor-pointer gap-3 overflow-visible bg-transparent p-4 shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow"
     >
       <div className="border-border bg-muted relative aspect-square overflow-hidden rounded-[14px] border">
