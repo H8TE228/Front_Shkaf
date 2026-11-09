@@ -9,7 +9,7 @@ export function Header() {
   const { data: isAuth } = useMe();
 
   return (
-    <header className="border-border bg-header-background sticky top-0 z-20 h-20 border-b px-0 backdrop-blur-sm lg:px-12">
+    <header className="bg-header-background sticky top-0 z-20 h-20 border-b px-0 backdrop-blur lg:px-12">
       <div className="mx-auto flex h-full w-full max-w-[1550px] items-center justify-between gap-4 px-6 md:justify-normal lg:px-0">
         <Link
           to="/"
@@ -17,19 +17,14 @@ export function Header() {
         >
           Добрый Шкаф
         </Link>
+
         <LocationButton />
+
         <div className="hidden flex-1 md:block">
           <InputSearch />
         </div>
+
         <nav className="ml-auto hidden shrink-0 items-center gap-1 sm:gap-3 md:flex">
-          <button
-            onClick={() => navigate("/catalog")}
-            type="button"
-            className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
-          >
-            <PackageSearch className="size-6" />
-            <span className="hidden sm:block">Каталог</span>
-          </button>
           <button
             onClick={() => navigate("/points")}
             type="button"
@@ -38,6 +33,7 @@ export function Header() {
             <Map className="size-6" />
             <span className="hidden sm:block">Пункты</span>
           </button>
+
           <button
             onClick={() => navigate("/articles")}
             type="button"
@@ -46,6 +42,16 @@ export function Header() {
             <Newspaper className="size-6" />
             <span className="hidden sm:block">Статьи</span>
           </button>
+
+          <button
+            onClick={() => navigate("/catalog")}
+            type="button"
+            className="text-foreground hover:text-foreground/80 flex h-12 w-13 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg text-xs transition-colors"
+          >
+            <PackageSearch className="size-6" />
+            <span className="hidden sm:block">Каталог</span>
+          </button>
+
           <button
             onClick={() => {
               if (isAuth) {

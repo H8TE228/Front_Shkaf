@@ -178,6 +178,9 @@ export function RegisterForm() {
                     {...field}
                     onChange={(e) => {
                       let value = e.target.value;
+
+                      // ! Починить баг, если нажимать пероед "+"" или перед "7" и ввести
+                      // ! что то - то будет введена еще одна "7"
                       value =
                         "+7" + value.slice(2).replace(/\D/g, "").slice(0, 10);
 

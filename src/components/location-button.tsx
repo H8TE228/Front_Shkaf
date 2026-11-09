@@ -82,7 +82,7 @@ export function LocationButton() {
         onClick={handleGetLocation}
         type="button"
         disabled={isLoading}
-        className="text-foreground hover:text-foreground/80 hidden h-10 shrink-0 cursor-pointer items-center justify-start gap-2 rounded-xl bg-transparent px-4 text-sm hover:bg-transparent lg:flex"
+        className="text-foreground hover:text-foreground/80 h-10 shrink-0 cursor-pointer items-center justify-start gap-2 rounded-xl bg-transparent px-4 text-sm hover:bg-transparent lg:flex"
       >
         <MapPin className="size-6" />
         {isLoading

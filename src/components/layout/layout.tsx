@@ -9,10 +9,12 @@ export function Layout() {
   // мб + lg:px-12
   return (
     <div className="flex min-h-svh flex-col">
-      <Header />
-      <main className="min-w-0 flex-1 px-0 pb-16 lg:px-12">
-        <Outlet />
-      </main>
+      <div className="flex min-h-[90svh] flex-1 flex-col md:min-h-[85svh]">
+        <Header />
+        <main className="min-w-0 flex-1 px-0 pb-16 lg:px-12">
+          <Outlet />
+        </main>
+      </div>
       <Footer />
       <MobileBottomNav />
     </div>

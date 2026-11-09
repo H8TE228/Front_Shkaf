@@ -79,6 +79,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   --color-header-background: var(--header-background);
+  --color-bottom-nav-background: var(--bottom-nav-background);
 }
 
 :root {
@@ -86,7 +87,8 @@
   --background: #ffffff;
   --foreground: #1e2626;
   --card: #ffffff;
-  --header-background: rgb(255 255 255 / 90%);
+  --header-background: rgb(255 255 255 / 30%);
+  --bottom-nav-background: rgb(255 255 255 / 30%);
   --card-foreground: #1e2626;
   --popover: #ffffff;
   --popover-foreground: #1e2626;
@@ -137,7 +139,8 @@
   --background: #121616;
   --foreground: #e8eeee;
   --card: #1a2020;
-  --header-background: rgb(26 32 32 / 90%);
+  --header-background: rgb(26 32 32 / 30%);
+  --bottom-nav-background: rgb(26 32 32 / 30%);
   --card-foreground: #e8eeee;
   --popover: #1a2020;
   --popover-foreground: #e8eeee;

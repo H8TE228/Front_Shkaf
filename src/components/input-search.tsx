@@ -113,10 +113,6 @@ export function InputSearch() {
                   onClick={() => {
                     form.setValue("search", "");
                     setDismissedSearch(null);
-
-                    // if (location.pathname === "/catalog") {
-                    //   navigate("/catalog", { replace: true });
-                    // }
                   }}
                   variant="ghost"
                   size="icon"
