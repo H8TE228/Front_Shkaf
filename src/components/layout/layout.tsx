@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Footer } from "./footer";
 import { Header } from "./header";
+import { MobileBottomNav } from "./mobile-bottom-nav";
 
 // <div className="flex min-h-svh flex-1 flex-col"> - елси надо будет чтобы футер был снизу, а не на экране
 
@@ -13,6 +14,7 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 }

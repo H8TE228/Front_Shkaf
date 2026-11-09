@@ -10,7 +10,7 @@ export function Header() {
 
   return (
     <header className="border-border bg-header-background sticky top-0 z-20 h-20 border-b px-0 backdrop-blur-sm lg:px-12">
-      <div className="mx-auto flex h-full w-full max-w-[1550px] items-center gap-4 px-6 lg:px-0">
+      <div className="mx-auto flex h-full w-full max-w-[1550px] items-center justify-between gap-4 px-6 md:justify-normal lg:px-0">
         <Link
           to="/"
           className="text-primary shrink-0 text-lg leading-6 font-semibold whitespace-nowrap"
@@ -18,8 +18,10 @@ export function Header() {
           Добрый Шкаф
         </Link>
         <LocationButton />
-        <InputSearch />
-        <nav className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3">
+        <div className="hidden flex-1 md:block">
+          <InputSearch />
+        </div>
+        <nav className="ml-auto hidden shrink-0 items-center gap-1 sm:gap-3 md:flex">
           <button
             onClick={() => navigate("/catalog")}
             type="button"
