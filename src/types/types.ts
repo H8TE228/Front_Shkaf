@@ -5,6 +5,12 @@ export type ICoordinates = {
   latitude: number;
 };
 
+export type TLocationData = {
+  longitude: number;
+  latitude: number;
+  city: string;
+};
+
 export type TUser = components["schemas"]["User"];
 export type TLoginRequest = components["schemas"]["CustomTokenObtainPair"];
 export type TRegisterRequest = Omit<

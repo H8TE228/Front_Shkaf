@@ -1,30 +1,36 @@
 import { MapPin } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { getCityFromCoordinates } from "@/lib";
 import {
   STORAGE_KEY_LOCATION,
+  STORAGE_KEY_LOCATION_ATTEMPTED,
   STORAGE_KEY_USER_LOCATION_UPDATED_EVENT,
 } from "@/constants";
-
-interface ILocationData {
-  longitude: number;
-  latitude: number;
-  city: string;
-}
+import type { TLocationData } from "@/types";
 
 export function LocationButton() {
   const [isLoading, setIsLoading] = useState(false);
-  const [location, setLocation] = useState<ILocationData | null>(() => {
+  const [location, setLocation] = useState<TLocationData | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_LOCATION);
-
       return saved ? JSON.parse(saved) : null;
     } catch {
       localStorage.removeItem(STORAGE_KEY_LOCATION);
       return null;
     }
   });
+
+  useEffect(() => {
+    const alreadyAttempted = localStorage.getItem(
+      STORAGE_KEY_LOCATION_ATTEMPTED,
+    );
+
+    if (!location && !alreadyAttempted) {
+      localStorage.setItem(STORAGE_KEY_LOCATION_ATTEMPTED, "true");
+      handleGetLocation();
+    }
+  }, []);
 
   function handleGetLocation() {
     if (!navigator.geolocation) {
@@ -44,17 +50,19 @@ export function LocationButton() {
             latitude,
           });
 
-          const newLocation: ILocationData = {
+          const newLocation: TLocationData = {
             longitude,
             latitude,
             city: city ?? "Неизвестный город",
           };
 
           setLocation(newLocation);
+
           localStorage.setItem(
             STORAGE_KEY_LOCATION,
             JSON.stringify(newLocation),
           );
+
           window.dispatchEvent(
             new Event(STORAGE_KEY_USER_LOCATION_UPDATED_EVENT),
           );
