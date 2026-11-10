@@ -1,9 +1,8 @@
+import { useMobileSearch } from "@/hooks";
 import { Button } from "../ui/button";
 
 export function Hero() {
-  //* не хочется использовать контекст или пробрасывать пропсы
-  const searchInput =
-    document.querySelector<HTMLInputElement>("#header-search");
+  const { openSearch } = useMobileSearch();
 
   return (
     <section className="mx-auto w-full max-w-[1550px] px-0">
@@ -25,7 +24,15 @@ export function Hero() {
           <Button
             variant="defaultWhite"
             type="button"
-            onClick={() => searchInput?.focus()}
+            onClick={() => {
+              if (window.matchMedia("(min-width: 48rem)").matches) {
+                document
+                  .querySelector<HTMLInputElement>("#header-search")
+                  ?.focus();
+              } else {
+                openSearch();
+              }
+            }}
             className="absolute bottom-2 left-1/2 h-11 w-[calc(100%-0.5rem)] -translate-x-1/2 text-sm font-semibold md:bottom-8 md:h-12 md:w-70 md:text-base"
           >
             Найти вещь

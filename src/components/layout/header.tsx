@@ -21,7 +21,7 @@ export function Header() {
         <LocationButton />
 
         <div className="hidden flex-1 md:block">
-          <InputSearch />
+          <InputSearch variant="header" />
         </div>
 
         <nav className="ml-auto hidden shrink-0 items-center gap-1 sm:gap-3 md:flex">

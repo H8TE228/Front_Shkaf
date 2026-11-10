@@ -22,7 +22,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 type InputSearchProps = {
   variant: "dialog" | "header";
-  onNavigate: () => void;
+  onNavigate?: () => void;
 };
 
 export function InputSearch({
