@@ -17,8 +17,8 @@ export function Layout() {
   // мб + lg:px-12
   return (
     <MobileSearchProvider>
-      <div className="flex min-h-svh flex-col">
-        <div className="flex min-h-[90svh] flex-1 flex-col md:min-h-[85svh]">
+      <div className="flex min-h-dvh flex-col">
+        <div className="flex min-h-[90dvh] flex-1 flex-col md:min-h-[85dvh]">
           <Header />
           <main className="min-w-0 flex-1 px-0 pb-16 lg:px-12">
             <Outlet />

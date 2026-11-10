@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Search, X } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
@@ -22,12 +22,14 @@ type FormValues = z.infer<typeof formSchema>;
 
 type InputSearchProps = {
   variant: "dialog" | "header";
-  onNavigate?: () => void;
+  onCloseModal?: () => void;
+  focusOnOpen?: boolean;
 };
 
 export function InputSearch({
   variant = "header",
-  onNavigate,
+  onCloseModal,
+  focusOnOpen = false,
 }: InputSearchProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +47,12 @@ export function InputSearch({
       search: searchText,
     },
   });
+
+  useEffect(() => {
+    if (focusOnOpen) {
+      form.setFocus("search");
+    }
+  }, [focusOnOpen, form]);
 
   const draftSearch = useWatch({
     control: form.control,
@@ -79,26 +87,36 @@ export function InputSearch({
     if (!nextSearch) return;
 
     setIsOpen(false);
-    onNavigate?.();
-    navigate(`/catalog?search=${nextSearch}`);
+    onCloseModal?.();
+    navigate(`/catalog?search=${nextSearch}`, {
+      replace: variant === "dialog",
+    });
   }
 
   return (
     <div
-      className={`bg-muted relative h-12 rounded-xl ${
-        variant === "header" ? "hidden flex-1 sm:block" : "w-full"
+      className={`relative rounded-xl ${
+        variant === "dialog" ? "flex h-full min-h-0 flex-col" : "h-12"
+      } ${
+        variant === "header"
+          ? "bg-muted hidden flex-1 sm:block"
+          : "w-full bg-transparent"
       }`}
     >
       <form
         role="search"
         onSubmit={form.handleSubmit(onSubmit)}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            closeTimeout.current = setTimeout(() => {
-              setIsOpen(false);
-            }, 150);
-          }
-        }}
+        onBlur={
+          variant === "header"
+            ? (event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  closeTimeout.current = setTimeout(() => {
+                    setIsOpen(false);
+                  }, 150);
+                }
+              }
+            : undefined
+        }
         onFocus={() => {
           if (closeTimeout.current) {
             clearTimeout(closeTimeout.current);
@@ -106,56 +124,85 @@ export function InputSearch({
 
           setIsOpen(true);
         }}
-        className="size-full"
+        className={
+          variant === "dialog" ? "flex min-h-0 flex-1 flex-col" : "size-full"
+        }
         autoComplete="off"
       >
         <Controller
           name="search"
           control={form.control}
           render={({ field }) => (
-            <Field className="h-full">
-              <div className="relative size-full">
-                <Input
-                  {...field}
-                  id={`${variant}-search`}
-                  className="placeholder:text-muted-foreground size-full border-0 px-6 py-0 outline-none md:text-base"
-                  placeholder="Найти нужную вещь"
-                  onChange={(event) => {
-                    const value = event.target.value.replace(/^\s+/, "");
-                    field.onChange(value);
-                  }}
-                />
-                {draftSearch && (
-                  <Button
+            <Field
+              className={
+                variant === "dialog" ? "h-12 shrink-0 bg-transparent" : "h-full"
+              }
+            >
+              <div className="flex h-full w-full items-center gap-2">
+                {variant === "dialog" && (
+                  <button
                     type="button"
-                    onClick={() => {
-                      form.setValue("search", "");
-                      form.setFocus("search");
+                    className="hover:bg-muted flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full"
+                    onClick={onCloseModal}
+                  >
+                    <ArrowLeft />
+                  </button>
+                )}
+                <div
+                  className={`relative min-w-0 flex-1 ${
+                    variant === "dialog" ? "h-full" : "size-full"
+                  }`}
+                >
+                  <Input
+                    {...field}
+                    id={`${variant}-search`}
+                    className={`placeholder:text-muted-foreground size-full border-0 py-0 outline-none md:text-base ${
+                      variant === "dialog" ? "bg-muted rounded-xl px-4" : "px-6"
+                    }`}
+                    placeholder="Найти нужную вещь"
+                    onChange={(event) => {
+                      const value = event.target.value.replace(/^\s+/, "");
+                      field.onChange(value);
                     }}
-                    variant="ghost"
-                    size="icon"
-                    className={`text-muted-foreground absolute top-1 ${variant === "dialog" ? "right-3" : "right-9"} size-10`}
-                  >
-                    <X className="size-6" />
-                  </Button>
-                )}
-                {variant === "header" && (
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground absolute top-1 right-1 size-10"
-                  >
-                    <Search className="size-6" />
-                  </Button>
-                )}
+                  />
+                  {draftSearch && (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        form.setValue("search", "");
+                        form.setFocus("search");
+                      }}
+                      variant="ghost"
+                      size="icon"
+                      className={`text-muted-foreground absolute top-1 ${variant === "dialog" ? "right-3" : "right-9"} size-10`}
+                    >
+                      <X className="size-6" />
+                    </Button>
+                  )}
+                  {variant === "header" && (
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground absolute top-1 right-1 size-10"
+                    >
+                      <Search className="size-6" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </Field>
           )}
         />
 
         {isOpen && draftSearch && (
-          <div className="border-border bg-popover text-popover-foreground absolute top-full right-0 left-0 z-30 mt-2 max-h-[70vh] overflow-y-auto rounded-xl border p-2 shadow-lg">
+          <div
+            className={`border-border bg-popover text-popover-foreground z-30 overflow-y-auto p-2 ${
+              variant === "dialog"
+                ? "bg-popover/0 mt-2 min-h-0 flex-1 rounded-xl"
+                : "absolute top-full right-0 left-0 mt-2 max-h-[70vh] rounded-xl border shadow-lg"
+            }`}
+          >
             {(isSearchPending || isLoading) && (
               <p className="text-muted-foreground px-3 py-2 text-sm">
                 Поиск...
@@ -184,6 +231,7 @@ export function InputSearch({
                 <Link
                   key={item.id}
                   to={`/item/${item.id}`}
+                  replace={variant === "dialog"}
                   onClick={() => {
                     if (closeTimeout.current) {
                       clearTimeout(closeTimeout.current);
@@ -194,9 +242,13 @@ export function InputSearch({
                     form.setValue("search", selectedTitle);
                     setDebouncedSearch(selectedTitle);
                     setIsOpen(false);
-                    onNavigate?.();
+                    onCloseModal?.();
                   }}
-                  className="hover:bg-muted focus-visible:bg-muted block rounded-lg px-3 py-2 outline-none"
+                  className={`block rounded-lg outline-none ${
+                    variant === "dialog"
+                      ? "hover:bg-muted/60 focus-visible:bg-muted/60 px-3 py-2"
+                      : "hover:bg-muted focus-visible:bg-muted px-3 py-2"
+                  }`}
                 >
                   <span className="block truncate text-sm font-medium">
                     {item.title}

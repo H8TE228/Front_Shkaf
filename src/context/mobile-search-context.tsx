@@ -1,10 +1,12 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MobileSearchDialog } from "@/components/mobile-search-dialog";
 
 type MobileSearchContextType = {
-  openMobileSearch: () => void;
-  closeMobileSearch: () => void;
+  openMobileSearchModal: () => void;
+  closeMobileSearchModal: () => void;
+  dismissMobileSearchModal: () => void;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -12,21 +14,67 @@ export const MobileSearchContext =
   createContext<MobileSearchContextType | null>(null);
 
 export function MobileSearchProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const hasHistoryEntry = useRef(false);
 
-  function openMobileSearch() {
+  function openMobileSearchModal() {
+    if (!hasHistoryEntry.current) {
+      navigate(`${location.pathname}${location.search}${location.hash}`, {
+        state: location.state,
+      });
+      hasHistoryEntry.current = true;
+    }
+
     setIsOpen(true);
   }
 
-  function closeMobileSearch() {
+  function closeMobileSearchModal() {
+    if (hasHistoryEntry.current) {
+      hasHistoryEntry.current = false;
+      setIsOpen(false);
+      navigate(-1);
+      return;
+    }
+
     setIsOpen(false);
   }
 
+  function dismissMobileSearchModal() {
+    hasHistoryEntry.current = false;
+    setIsOpen(false);
+  }
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handlePopState() {
+      hasHistoryEntry.current = false;
+      setIsOpen(false);
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isOpen]);
+
   return (
-    <MobileSearchContext value={{ openMobileSearch, closeMobileSearch }}>
+    <MobileSearchContext
+      value={{
+        openMobileSearchModal,
+        closeMobileSearchModal,
+        dismissMobileSearchModal,
+      }}
+    >
       {children}
 
-      <MobileSearchDialog open={isOpen} onOpenChange={setIsOpen} />
+      <MobileSearchDialog
+        open={isOpen}
+        onOpenChange={(open) =>
+          open ? openMobileSearchModal() : closeMobileSearchModal()
+        }
+        onDismiss={dismissMobileSearchModal}
+      />
     </MobileSearchContext>
   );
 }

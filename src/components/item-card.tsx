@@ -15,7 +15,7 @@ export function ItemCard({ item: item }: TItemCardProps) {
   return (
     <Card
       onClick={() => navigate(`/item/${item.id}`)}
-      className="min-w-0 cursor-pointer gap-3 overflow-visible bg-transparent p-4 shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow"
+      className="min-w-0 cursor-pointer gap-3 overflow-visible bg-transparent shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow"
     >
       <div className="border-border bg-muted relative aspect-square overflow-hidden rounded-[14px] border">
         <div className="text-muted-foreground flex size-full items-center justify-center">

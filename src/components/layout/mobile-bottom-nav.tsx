@@ -1,12 +1,12 @@
 import { useMe, useMobileSearch } from "@/hooks";
-import { Map, Newspaper, PackageSearch, Search, UserRound } from "lucide-react";
+import { House, Map, PackageSearch, Search, UserRound } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export function MobileBottomNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { openMobileSearch } = useMobileSearch();
+  const { openMobileSearchModal } = useMobileSearch();
 
   const { data: isAuth } = useMe();
 
@@ -20,14 +20,14 @@ export function MobileBottomNav() {
   return (
     <nav className="bg-bottom-nav-background fixed inset-x-0 bottom-0 z-40 grid h-26 grid-cols-5 items-center justify-items-center rounded-t-4xl border-t px-2 backdrop-blur md:hidden">
       <button
-        onClick={() => navigate("/articles")}
+        onClick={() => navigate("/")}
         className={`flex size-18 cursor-pointer items-center justify-center rounded-2xl transition-colors ${
-          isActive("/articles")
+          isActive("/")
             ? "bg-secondary text-primary"
             : "text-foreground hover:bg-muted"
         }`}
       >
-        <Newspaper className="size-7" />
+        <House className="size-7" />
       </button>
 
       <button
@@ -43,7 +43,7 @@ export function MobileBottomNav() {
 
       <button
         type="button"
-        onClick={openMobileSearch}
+        onClick={openMobileSearchModal}
         className="text-primary hover:bg-muted flex size-23 cursor-pointer items-center justify-center rounded-2xl transition-colors"
       >
         <Search className="size-9" />
