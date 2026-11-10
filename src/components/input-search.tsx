@@ -20,15 +20,21 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function InputSearch() {
+type InputSearchProps = {
+  variant: string;
+  onNavigate: () => void;
+};
+
+export function InputSearch({
+  variant = "header",
+  onNavigate,
+}: InputSearchProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
+  const [isOpen, setIsOpen] = useState(false);
   const searchText = searchParams.get("search")?.trim() ?? "";
-  const [dismissedSearch, setDismissedSearch] = useState<string | null>(
-    searchText,
-  );
   const [debouncedSearch, setDebouncedSearch] = useState(searchText);
 
   const form = useForm<FormValues>({
@@ -43,7 +49,6 @@ export function InputSearch() {
     name: "search",
   }).trim();
 
-  const isOpen = Boolean(draftSearch) && dismissedSearch !== draftSearch;
   const isSearchPending = draftSearch !== debouncedSearch;
 
   const {
@@ -71,19 +76,27 @@ export function InputSearch() {
 
     if (!nextSearch) return;
 
-    setDismissedSearch(draftSearch);
+    setIsOpen(false);
+    onNavigate?.();
     navigate(`/catalog?search=${nextSearch}`);
   }
 
   return (
-    <div className="bg-muted relative hidden h-12 flex-1 rounded-xl sm:block">
+    <div
+      className={`bg-muted relative h-12 rounded-xl ${
+        variant === "header" ? "hidden flex-1 sm:block" : "w-full"
+      }`}
+    >
       <form
         role="search"
         onSubmit={form.handleSubmit(onSubmit)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
-            setDismissedSearch(draftSearch);
+            setIsOpen(false);
           }
+        }}
+        onFocus={() => {
+          setIsOpen(true);
         }}
         className="size-full"
         autoComplete="off"
@@ -96,30 +109,28 @@ export function InputSearch() {
               <div className="relative size-full">
                 <Input
                   {...field}
-                  id="header-search"
+                  id={`${variant}-search`}
                   className="placeholder:text-muted-foreground size-full border-0 py-0 pr-12 pl-6 outline-none md:text-base"
                   placeholder="Найти нужную вещь"
-                  onFocus={() => {
-                    if (draftSearch) setDismissedSearch(null);
-                  }}
                   onChange={(event) => {
                     const value = event.target.value.replace(/^\s+/, "");
                     field.onChange(value);
-                    setDismissedSearch(null);
                   }}
                 />
-                <Button
-                  type="button"
-                  onClick={() => {
-                    form.setValue("search", "");
-                    setDismissedSearch(null);
-                  }}
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground absolute top-1 right-9 size-10"
-                >
-                  <X className="size-6" />
-                </Button>
+                {draftSearch && (
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      form.setValue("search", "");
+                      form.setFocus("search");
+                    }}
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground absolute top-1 right-9 size-10"
+                  >
+                    <X className="size-6" />
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   variant="ghost"
@@ -167,7 +178,8 @@ export function InputSearch() {
                     const selectedTitle = item.title.trim();
                     form.setValue("search", selectedTitle);
                     setDebouncedSearch(selectedTitle);
-                    setDismissedSearch(selectedTitle);
+                    setIsOpen(false);
+                    onNavigate?.();
                   }}
                   className="hover:bg-muted focus-visible:bg-muted block rounded-lg px-3 py-2 outline-none"
                 >

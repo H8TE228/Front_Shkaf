@@ -1,6 +1,7 @@
 import { useMe } from "@/hooks";
-import { Map, Newspaper, PackageSearch, Search, UserRound } from "lucide-react";
+import { Map, Newspaper, PackageSearch, UserRound } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { MobileSearchDialog } from "../mobile-search-dialog";
 
 export function MobileBottomNav() {
   const navigate = useNavigate();
@@ -39,13 +40,7 @@ export function MobileBottomNav() {
         <Map className="size-7" />
       </button>
 
-      <button
-        onClick={() => navigate("#")}
-        aria-label="Поиск"
-        className="text-primary hover:bg-muted flex size-23 cursor-pointer items-center justify-center rounded-2xl transition-colors"
-      >
-        <Search className="size-9" />
-      </button>
+      <MobileSearchDialog />
 
       <button
         onClick={() => navigate("/catalog")}
