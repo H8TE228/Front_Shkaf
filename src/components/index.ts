@@ -9,4 +9,3 @@ export * from "./catalog";
 export * from "./article";
 export * from "./input-search";
 export * from "./mobile-search-dialog";
-export * from "./context";

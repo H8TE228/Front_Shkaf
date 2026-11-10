@@ -16,11 +16,9 @@ import { getCurrentDay } from "@/lib";
 
 export function CollectionPoints() {
   const currentDay = getCurrentDay();
-
   const [center, setCenter] = useState(
     () => getSavedCoordinates() ?? defaultMapCenter,
   );
-
   const { data: exchangePoints } = useExchangePoints();
 
   useEffect(() => {
@@ -61,23 +59,34 @@ export function CollectionPoints() {
           <YMapDefaultSchemeLayer />
           <YMapDefaultFeaturesLayer />
 
-          {exchangePoints?.map((point, index) => (
-            <YMapMarker
-              key={point.id}
-              coordinates={reactify.useDefault([
-                point.address.longitude,
-                point.address.latitude,
-              ])}
-            >
-              <div
-                className="bg-primary text-primary-foreground flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[#00ff15] text-sm font-semibold shadow-lg"
-                title={`${point.title} — ${point.address.country}, ${point.address.city}, ${point.address.street} ${point.address.building}`}
-                aria-label={point.title}
+          {exchangePoints?.map((point, index) => {
+            const { longitude, latitude } = point.address;
+            const yandexMapsUrl = new URL("https://yandex.ru/maps/");
+            yandexMapsUrl.searchParams.set("pt", `${longitude},${latitude}`);
+            yandexMapsUrl.searchParams.set("z", "16");
+            yandexMapsUrl.searchParams.set("l", "map");
+
+            return (
+              <YMapMarker
+                onClick={() =>
+                  window.open(
+                    yandexMapsUrl.toString(),
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
+                key={point.id}
+                coordinates={reactify.useDefault([longitude, latitude])}
               >
-                {index + 1}
-              </div>
-            </YMapMarker>
-          ))}
+                <div
+                  className="bg-primary text-primary-foreground flex size-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-[#00ff15] text-sm font-semibold shadow-lg"
+                  title={`${point.title} — ${point.address.country}, ${point.address.city}, ${point.address.street} ${point.address.building}`}
+                >
+                  {index + 1}
+                </div>
+              </YMapMarker>
+            );
+          })}
         </YMap>
       </div>
 

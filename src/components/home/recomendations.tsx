@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 export function Recomendations() {
   const navigate = useNavigate();
+
+  // * в дальнейшем тут будет ручкка на рекомендации
   const { data: items, isLoading, isError } = useItems();
 
   return (

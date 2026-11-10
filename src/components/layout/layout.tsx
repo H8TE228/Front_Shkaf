@@ -3,7 +3,7 @@ import { Footer } from "./footer";
 import { Header } from "./header";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 import { useEffect } from "react";
-import { MobileSearchProvider } from "../context";
+import { MobileSearchProvider } from "../../context";
 
 // <div className="flex min-h-svh flex-1 flex-col"> - елси надо будет чтобы футер был снизу, а не на экране
 

@@ -1,4 +1,4 @@
-import { MobileSearchContext } from "@/components";
+import { MobileSearchContext } from "@/context";
 import { useContext } from "react";
 
 export function useMobileSearch() {

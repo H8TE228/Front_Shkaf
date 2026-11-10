@@ -6,7 +6,7 @@ export function MobileBottomNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { openSearch } = useMobileSearch();
+  const { openMobileSearch } = useMobileSearch();
 
   const { data: isAuth } = useMe();
 
@@ -43,7 +43,7 @@ export function MobileBottomNav() {
 
       <button
         type="button"
-        onClick={openSearch}
+        onClick={openMobileSearch}
         className="text-primary hover:bg-muted flex size-23 cursor-pointer items-center justify-center rounded-2xl transition-colors"
       >
         <Search className="size-9" />

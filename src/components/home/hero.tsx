@@ -2,7 +2,7 @@ import { useMobileSearch } from "@/hooks";
 import { Button } from "../ui/button";
 
 export function Hero() {
-  const { openSearch } = useMobileSearch();
+  const { openMobileSearch } = useMobileSearch();
 
   return (
     <section className="mx-auto w-full max-w-[1550px] px-0">
@@ -30,7 +30,7 @@ export function Hero() {
                   .querySelector<HTMLInputElement>("#header-search")
                   ?.focus();
               } else {
-                openSearch();
+                openMobileSearch();
               }
             }}
             className="absolute bottom-2 left-1/2 h-11 w-[calc(100%-0.5rem)] -translate-x-1/2 text-sm font-semibold md:bottom-8 md:h-12 md:w-70 md:text-base"
