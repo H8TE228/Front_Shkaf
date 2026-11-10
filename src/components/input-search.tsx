@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   Link,
@@ -21,7 +21,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 type InputSearchProps = {
-  variant: string;
+  variant: "dialog" | "header";
   onNavigate: () => void;
 };
 
@@ -36,6 +36,8 @@ export function InputSearch({
   const [isOpen, setIsOpen] = useState(false);
   const searchText = searchParams.get("search")?.trim() ?? "";
   const [debouncedSearch, setDebouncedSearch] = useState(searchText);
+
+  const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -92,10 +94,16 @@ export function InputSearch({
         onSubmit={form.handleSubmit(onSubmit)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
-            setIsOpen(false);
+            closeTimeout.current = setTimeout(() => {
+              setIsOpen(false);
+            }, 150);
           }
         }}
         onFocus={() => {
+          if (closeTimeout.current) {
+            clearTimeout(closeTimeout.current);
+          }
+
           setIsOpen(true);
         }}
         className="size-full"
@@ -110,7 +118,7 @@ export function InputSearch({
                 <Input
                   {...field}
                   id={`${variant}-search`}
-                  className="placeholder:text-muted-foreground size-full border-0 py-0 pr-12 pl-6 outline-none md:text-base"
+                  className="placeholder:text-muted-foreground size-full border-0 px-6 py-0 outline-none md:text-base"
                   placeholder="Найти нужную вещь"
                   onChange={(event) => {
                     const value = event.target.value.replace(/^\s+/, "");
@@ -126,19 +134,21 @@ export function InputSearch({
                     }}
                     variant="ghost"
                     size="icon"
-                    className="text-muted-foreground absolute top-1 right-9 size-10"
+                    className={`text-muted-foreground absolute top-1 ${variant === "dialog" ? "right-3" : "right-9"} size-10`}
                   >
                     <X className="size-6" />
                   </Button>
                 )}
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground absolute top-1 right-1 size-10"
-                >
-                  <Search className="size-6" />
-                </Button>
+                {variant === "header" && (
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground absolute top-1 right-1 size-10"
+                  >
+                    <Search className="size-6" />
+                  </Button>
+                )}
               </div>
             </Field>
           )}
@@ -175,7 +185,12 @@ export function InputSearch({
                   key={item.id}
                   to={`/item/${item.id}`}
                   onClick={() => {
+                    if (closeTimeout.current) {
+                      clearTimeout(closeTimeout.current);
+                    }
+
                     const selectedTitle = item.title.trim();
+
                     form.setValue("search", selectedTitle);
                     setDebouncedSearch(selectedTitle);
                     setIsOpen(false);

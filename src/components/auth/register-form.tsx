@@ -88,10 +88,8 @@ export function RegisterForm() {
 
   return (
     <Card className="w-full max-w-4xl p-8">
-      <div className="mb-8">
-        <h1 className="mb-3 text-[32px] leading-10 font-semibold">
-          Регистрация
-        </h1>
+      <div>
+        <h1 className="text-[32px] leading-10 font-semibold">Регистрация</h1>
         <p className="text-muted-foreground text-base leading-6">
           Создайте аккаунт в Добром Шкафе.
         </p>

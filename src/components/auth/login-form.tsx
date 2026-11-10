@@ -45,8 +45,8 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-120 p-8">
-      <div className="mb-8">
-        <h1 className="mb-3 text-[32px] leading-10 font-semibold">Вход</h1>
+      <div>
+        <h1 className="text-[32px] leading-10 font-semibold">Вход</h1>
         <p className="text-muted-foreground text-base leading-6">
           Войдите в свой аккаунт.
         </p>
