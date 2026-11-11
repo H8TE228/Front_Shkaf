@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Search, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   Link,
@@ -40,6 +40,7 @@ export function InputSearch({
   const [debouncedSearch, setDebouncedSearch] = useState(searchText); // * для задержки при печати
 
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -82,9 +83,14 @@ export function InputSearch({
     }
   }, [form, location.pathname, searchParams]);
 
+  useLayoutEffect(() => {
+    if (variant === "dialog" && resultsRef.current) {
+      resultsRef.current.scrollTop = resultsRef.current.scrollHeight;
+    }
+  }, [items, variant]);
+
   function onSubmit({ search: value }: FormValues) {
     const nextSearch = value.trim();
-
     if (!nextSearch) return;
 
     setIsDropdownOpen(false);
@@ -126,7 +132,9 @@ export function InputSearch({
           setIsDropdownOpen(true);
         }}
         className={
-          variant === "dialog" ? "flex min-h-0 flex-1 flex-col" : "size-full"
+          variant === "dialog"
+            ? "flex min-h-0 flex-1 flex-col-reverse"
+            : "size-full"
         }
         autoComplete="off"
       >
@@ -136,7 +144,9 @@ export function InputSearch({
           render={({ field }) => (
             <Field
               className={
-                variant === "dialog" ? "h-12 shrink-0 bg-transparent" : "h-full"
+                variant === "dialog"
+                  ? "mb-4 h-12 shrink-0 bg-transparent"
+                  : "h-full"
               }
             >
               <div className="flex h-full w-full items-center gap-2">
@@ -156,6 +166,7 @@ export function InputSearch({
                 >
                   <Input
                     {...field}
+                    // ! autoFocus={focusOnOpen} тут баг на телефоне, инпут скрывается за панелью ввода и нужен скрол
                     id={`${variant}-search`}
                     className={`placeholder:text-muted-foreground size-full border-0 py-0 outline-none md:text-base ${
                       variant === "dialog" ? "bg-muted rounded-xl px-4" : "px-6"
@@ -198,10 +209,11 @@ export function InputSearch({
 
         {isDropdownOpen && draftSearch && (
           <div
+            ref={resultsRef}
             className={`border-border bg-popover text-popover-foreground z-30 overflow-y-auto p-2 ${
               variant === "dialog"
-                ? "bg-popover/0 mt-2 min-h-0 flex-1 rounded-xl"
-                : "absolute top-full right-0 left-0 mt-2 max-h-[70vh] rounded-xl border shadow-lg"
+                ? "bg-popover/0 mt-2 min-h-0 rounded-xl"
+                : "absolute top-full right-0 left-0 mt-2 max-h-[50vh] rounded-xl border shadow-lg"
             }`}
           >
             {(isSearchPending || isLoading) && (
@@ -209,13 +221,11 @@ export function InputSearch({
                 Поиск...
               </p>
             )}
-
             {!isSearchPending && isError && (
               <p className="text-destructive px-3 py-2 text-sm">
                 Не удалось загрузить результаты поиска
               </p>
             )}
-
             {!isSearchPending &&
               !isLoading &&
               !isError &&
@@ -224,11 +234,10 @@ export function InputSearch({
                   Ничего не найдено
                 </p>
               )}
-
             {!isSearchPending &&
               !isLoading &&
               !isError &&
-              items?.map((item) => (
+              items?.toReversed().map((item) => (
                 <Link
                   key={item.id}
                   to={`/item/${item.id}`}
