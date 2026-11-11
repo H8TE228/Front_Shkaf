@@ -6,7 +6,7 @@ export function Hero() {
 
   return (
     <section className="mx-auto w-full max-w-[1550px] px-0">
-      <div className="bg-muted relative grid aspect-2/1 grid-cols-2 overflow-hidden rounded-b-2xl md:aspect-auto md:h-132">
+      <div className="bg-muted relative grid aspect-2/1 grid-cols-2 overflow-hidden rounded-b-2xl lg:aspect-auto lg:h-132">
         <img
           className="absolute inset-0 size-full object-cover dark:brightness-90"
           src="/src/assets/images/hero-shelter-scene.webp"

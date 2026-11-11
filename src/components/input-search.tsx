@@ -9,7 +9,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { z } from "zod";
-import { useItems } from "@/hooks";
+import { useItems, useMobileSearch } from "@/hooks";
 import { Button } from "./ui/button";
 import { Field } from "./ui/field";
 import { Input } from "./ui/input";
@@ -22,22 +22,22 @@ type FormValues = z.infer<typeof formSchema>;
 
 type InputSearchProps = {
   variant: "dialog" | "header";
-  onCloseModal?: () => void;
   focusOnOpen?: boolean;
 };
 
 export function InputSearch({
   variant = "header",
-  onCloseModal,
   focusOnOpen = false,
 }: InputSearchProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const { closeMobileSearchModal } = useMobileSearch();
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchText = searchParams.get("search")?.trim() ?? "";
-  const [debouncedSearch, setDebouncedSearch] = useState(searchText);
+  const [debouncedSearch, setDebouncedSearch] = useState(searchText); // * для задержки при печати
 
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -48,24 +48,25 @@ export function InputSearch({
     },
   });
 
-  useEffect(() => {
-    if (focusOnOpen) {
-      form.setFocus("search");
-    }
-  }, [focusOnOpen, form]);
-
   const draftSearch = useWatch({
     control: form.control,
     name: "search",
   }).trim();
 
-  const isSearchPending = draftSearch !== debouncedSearch;
+  const isSearchPending = draftSearch !== debouncedSearch; // * чтобы не моргали результаты
 
+  // TODO потом добавить тут лимит
   const {
     data: items,
     isLoading,
     isError,
   } = useItems(debouncedSearch ? { search: debouncedSearch } : undefined);
+
+  useEffect(() => {
+    if (focusOnOpen) {
+      form.setFocus("search");
+    }
+  }, [focusOnOpen, form]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -86,8 +87,8 @@ export function InputSearch({
 
     if (!nextSearch) return;
 
-    setIsOpen(false);
-    onCloseModal?.();
+    setIsDropdownOpen(false);
+    closeMobileSearchModal?.();
     navigate(`/catalog?search=${nextSearch}`, {
       replace: variant === "dialog",
     });
@@ -111,7 +112,7 @@ export function InputSearch({
             ? (event) => {
                 if (!event.currentTarget.contains(event.relatedTarget)) {
                   closeTimeout.current = setTimeout(() => {
-                    setIsOpen(false);
+                    setIsDropdownOpen(false);
                   }, 150);
                 }
               }
@@ -122,7 +123,7 @@ export function InputSearch({
             clearTimeout(closeTimeout.current);
           }
 
-          setIsOpen(true);
+          setIsDropdownOpen(true);
         }}
         className={
           variant === "dialog" ? "flex min-h-0 flex-1 flex-col" : "size-full"
@@ -143,7 +144,7 @@ export function InputSearch({
                   <button
                     type="button"
                     className="hover:bg-muted flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full"
-                    onClick={onCloseModal}
+                    onClick={closeMobileSearchModal}
                   >
                     <ArrowLeft />
                   </button>
@@ -195,7 +196,7 @@ export function InputSearch({
           )}
         />
 
-        {isOpen && draftSearch && (
+        {isDropdownOpen && draftSearch && (
           <div
             className={`border-border bg-popover text-popover-foreground z-30 overflow-y-auto p-2 ${
               variant === "dialog"
@@ -241,8 +242,8 @@ export function InputSearch({
 
                     form.setValue("search", selectedTitle);
                     setDebouncedSearch(selectedTitle);
-                    setIsOpen(false);
-                    onCloseModal?.();
+                    setIsDropdownOpen(false);
+                    closeMobileSearchModal?.();
                   }}
                   className={`block rounded-lg outline-none ${
                     variant === "dialog"

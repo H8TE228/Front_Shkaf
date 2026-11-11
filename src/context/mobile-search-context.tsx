@@ -6,7 +6,7 @@ import { MobileSearchDialog } from "@/components/mobile-search-dialog";
 type MobileSearchContextType = {
   openMobileSearchModal: () => void;
   closeMobileSearchModal: () => void;
-  dismissMobileSearchModal: () => void;
+  // dismissMobileSearchModal: () => void;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -24,24 +24,26 @@ export function MobileSearchProvider({ children }: { children: ReactNode }) {
       navigate(`${location.pathname}${location.search}${location.hash}`, {
         state: location.state,
       });
+
       hasHistoryEntry.current = true;
     }
 
     setIsOpen(true);
   }
 
+  // function closeMobileSearchModal() {
+  //   if (hasHistoryEntry.current) {
+  //     hasHistoryEntry.current = false;
+  //     setIsOpen(false);
+  //     navigate(-1);
+  //     console.log(hasHistoryEntry.current, "2");
+  //     return;
+  //   }
+
+  //   setIsOpen(false);
+  // }
+
   function closeMobileSearchModal() {
-    if (hasHistoryEntry.current) {
-      hasHistoryEntry.current = false;
-      setIsOpen(false);
-      navigate(-1);
-      return;
-    }
-
-    setIsOpen(false);
-  }
-
-  function dismissMobileSearchModal() {
     hasHistoryEntry.current = false;
     setIsOpen(false);
   }
@@ -63,7 +65,6 @@ export function MobileSearchProvider({ children }: { children: ReactNode }) {
       value={{
         openMobileSearchModal,
         closeMobileSearchModal,
-        dismissMobileSearchModal,
       }}
     >
       {children}
@@ -73,7 +74,6 @@ export function MobileSearchProvider({ children }: { children: ReactNode }) {
         onOpenChange={(open) =>
           open ? openMobileSearchModal() : closeMobileSearchModal()
         }
-        onDismiss={dismissMobileSearchModal}
       />
     </MobileSearchContext>
   );
