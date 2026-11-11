@@ -37,6 +37,7 @@
 @theme inline {
   /* --font-heading: var(--font-sans); */
   /* --font-sans: "Inter Variable", sans-serif; */
+  --breakpoint-xs: 480px;
   --font-sans: Onest, sans-serif;
   --font-heading: Onest, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);

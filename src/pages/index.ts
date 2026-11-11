@@ -6,3 +6,4 @@ export * from "./profile/profile-page";
 export * from "./catalog/catalog-page";
 export * from "./item/item-page.tsx";
 export * from "./articles/articles-page.tsx";
+export * from "./points/points-page.tsx";

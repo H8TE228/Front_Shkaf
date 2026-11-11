@@ -1,3 +1,9 @@
+import { Article } from "@/components";
+
 export function ArticlesPage() {
-  return <>Статьи</>;
+  return (
+    <>
+      <Article />
+    </>
+  );
 }
