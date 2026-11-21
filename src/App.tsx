@@ -10,6 +10,7 @@ import {
   RegisterPage,
   ArticlesPage,
   PointsPage,
+  FavoritesPage,
 } from "@/pages";
 import { useMe } from "./hooks";
 
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             Component: ProfilePage,
+          },
+          {
+            path: "/favorites",
+            Component: FavoritesPage,
           },
         ],
       },
