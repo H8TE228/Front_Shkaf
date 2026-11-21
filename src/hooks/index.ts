@@ -5,3 +5,4 @@ export * from "./item-types";
 export * from "./exchange-points";
 export * from "./me";
 export * from "./mobile-search";
+export * from "./conversations";
