@@ -4,6 +4,76 @@
  */
 
 export interface paths {
+    "/api/v1/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Диалоги по вещам. Пользователь видит только диалоги, в которых участвует. */
+        get: operations["conversations_list"];
+        put?: never;
+        /** @description Начинает диалог по вещи или возвращает уже существующий (200). */
+        post: operations["conversations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Диалоги по вещам. Пользователь видит только диалоги, в которых участвует. */
+        get: operations["conversations_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET: сообщения по порядку. POST: отправка сообщения, оно же придёт участникам по WebSocket. */
+        get: operations["conversations_messages_list"];
+        put?: never;
+        /** @description GET: сообщения по порядку. POST: отправка сообщения, оно же придёт участникам по WebSocket. */
+        post: operations["conversations_messages_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Отмечает прочитанными сообщения собеседника. */
+        post: operations["conversations_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/exchangePoints": {
         parameters: {
             query?: never;
@@ -34,6 +104,124 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["exchangePoints_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/exchangePoints/{id}/bookmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["exchangePoints_bookmark_create"];
+        delete: operations["exchangePoints_bookmark_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exchanges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Мои передачи: где я отдаю вещь или получаю её. Видны только участникам. */
+        get: operations["exchanges_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exchanges/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Мои передачи: где я отдаю вещь или получаю её. Видны только участникам. */
+        get: operations["exchanges_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exchanges/{id}/agree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Отдающий соглашается: вещь резервируется, другие заявки ждут. */
+        post: operations["exchanges_agree_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exchanges/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Получатель отзывает заявку, или любая сторона отменяет согласованную передачу. */
+        post: operations["exchanges_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exchanges/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Сторона отмечает, что передача состоялась. После отметок обеих сторон передача завершена. */
+        post: operations["exchanges_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exchanges/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Отдающий отклоняет заявку. */
+        post: operations["exchanges_decline_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/itemTypes": {
@@ -86,6 +274,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/items/{item_id}/exchanges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET: заявки на вещь. Владелец видит все, остальные только свои.
+         *     POST: оставить заявку на получение вещи.
+         */
+        get: operations["items_exchanges_list"];
+        put?: never;
+        /**
+         * @description GET: заявки на вещь. Владелец видит все, остальные только свои.
+         *     POST: оставить заявку на получение вещи.
+         */
+        post: operations["items_exchanges_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/items/{id}": {
         parameters: {
             query?: never;
@@ -104,6 +316,22 @@ export interface paths {
         head?: never;
         /** @description Объявления. В списке по умолчанию только активные, другие статусы выбираются через ?status=. */
         patch: operations["items_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/items/{id}/bookmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["items_bookmark_create"];
+        delete: operations["items_bookmark_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/items/{id}/photos": {
@@ -156,6 +384,22 @@ export interface paths {
         patch: operations["me_partial_update"];
         trace?: never;
     };
+    "/api/v1/me/bookmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_bookmarks_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/change-password": {
         parameters: {
             query?: never;
@@ -187,6 +431,148 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Мои уведомления, сначала новые. ?unread=true — только непрочитанные. */
+        get: operations["me_notifications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Мои уведомления, сначала новые. ?unread=true — только непрочитанные. */
+        post: operations["me_notifications_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Мои уведомления, сначала новые. ?unread=true — только непрочитанные. */
+        post: operations["me_notifications_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Мои уведомления, сначала новые. ?unread=true — только непрочитанные. */
+        get: operations["me_notifications_unread_count_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Мои подписки на новые объявления. Пустое условие означает «любое». */
+        get: operations["me_subscriptions_list"];
+        put?: never;
+        /** @description Мои подписки на новые объявления. Пустое условие означает «любое». */
+        post: operations["me_subscriptions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/subscriptions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Мои подписки на новые объявления. Пустое условие означает «любое». */
+        get: operations["me_subscriptions_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Мои подписки на новые объявления. Пустое условие означает «любое». */
+        delete: operations["me_subscriptions_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Мои подписки на новые объявления. Пустое условие означает «любое». */
+        patch: operations["me_subscriptions_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Отзывы видны всем. Оставить отзыв может участник завершённой передачи, менять и удалять — только автор. */
+        get: operations["reviews_list"];
+        put?: never;
+        /** @description Отзывы видны всем. Оставить отзыв может участник завершённой передачи, менять и удалять — только автор. */
+        post: operations["reviews_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reviews/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Отзывы видны всем. Оставить отзыв может участник завершённой передачи, менять и удалять — только автор. */
+        get: operations["reviews_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Отзывы видны всем. Оставить отзыв может участник завершённой передачи, менять и удалять — только автор. */
+        delete: operations["reviews_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Отзывы видны всем. Оставить отзыв может участник завершённой передачи, менять и удалять — только автор. */
+        patch: operations["reviews_partial_update"];
         trace?: never;
     };
     "/api/v1/schema/": {
@@ -241,6 +627,23 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["users_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/{id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Средняя оценка пользователя и количество отзывов о нём. */
+        get: operations["users_rating_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/users/login": {
@@ -330,6 +733,18 @@ export interface components {
             /** Format: double */
             longitude: number;
         };
+        /** @enum {unknown} */
+        BlankEnum: "";
+        Bookmark: {
+            readonly id: number;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+            readonly item: components["schemas"]["Item"] | null;
+            readonly point: components["schemas"]["ExchangePoint"] | null;
+        };
         ChangePassword: {
             old_password: string;
             new_password: string;
@@ -341,9 +756,58 @@ export interface components {
          * @enum {string}
          */
         ConditionEnum: "new" | "good" | "used";
+        Conversation: {
+            readonly id: number;
+            readonly item: components["schemas"]["ItemBrief"];
+            item_id: number;
+            readonly owner_id: number;
+            readonly requester_id: number;
+            /** @description Второй участник диалога */
+            readonly companion: components["schemas"]["Participant"];
+            readonly last_message: components["schemas"]["Message"] | null;
+            readonly unread_count: number;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+        };
         CustomTokenObtainPair: {
             email: string;
             password: string;
+        };
+        Exchange: {
+            readonly id: number;
+            readonly item: components["schemas"]["ItemBrief"];
+            readonly giver_id: number;
+            readonly receiver_id: number;
+            /** @default requested */
+            readonly status: components["schemas"]["ExchangeStatusEnum"];
+            /**
+             * Giver confirmation date
+             * Format: date-time
+             */
+            readonly giver_confirmed_at: string | null;
+            /**
+             * Receiver confirmation date
+             * Format: date-time
+             */
+            readonly receiver_confirmed_at: string | null;
+            /**
+             * Completion date
+             * Format: date-time
+             */
+            readonly completed_at: string | null;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+            /**
+             * Last update date
+             * Format: date-time
+             */
+            readonly updated_at: string;
         };
         /**
          * @description * `free` - free
@@ -366,6 +830,8 @@ export interface components {
             /** @description Типы вещей, которые принимает пункт */
             item_type_ids?: number[];
             status?: components["schemas"]["ExchangePointStatusEnum"];
+            /** @description Расстояние в метрах, есть только при поиске с lat и lng */
+            readonly distance: number | null;
             /**
              * Verification date
              * Format: date-time
@@ -393,6 +859,15 @@ export interface components {
          */
         ExchangePointStatusEnum: "active" | "needs_check" | "closed";
         /**
+         * @description * `requested` - requested
+         *     * `agreed` - agreed
+         *     * `completed` - completed
+         *     * `declined` - declined
+         *     * `cancelled` - cancelled
+         * @enum {string}
+         */
+        ExchangeStatusEnum: "requested" | "agreed" | "completed" | "declined" | "cancelled";
+        /**
          * @description * `free` - free
          *     * `points` - points
          *     * `charity` - charity
@@ -411,6 +886,15 @@ export interface components {
             exchange_format: components["schemas"]["ExchangeFormatEnum"];
             status?: components["schemas"]["ItemStatusEnum"];
             district?: string;
+            /**
+             * Format: double
+             * @description Сохраняется с округлением примерно до 500 м
+             */
+            latitude?: number | null;
+            /** Format: double */
+            longitude?: number | null;
+            /** @description Расстояние в метрах, есть только при поиске с lat и lng */
+            readonly distance: number | null;
             readonly photos: components["schemas"]["ItemPhoto"][];
             /**
              * Creation date
@@ -422,6 +906,14 @@ export interface components {
              * Format: date-time
              */
             readonly updated_at: string;
+        };
+        /** @description Краткая карточка вещи для диалогов и передач. */
+        ItemBrief: {
+            readonly id: number;
+            title: string;
+            status?: components["schemas"]["ItemStatusEnum"];
+            /** @description Первое фото объявления */
+            readonly cover: string | null;
         };
         ItemPhoto: {
             readonly id: number;
@@ -443,6 +935,43 @@ export interface components {
             title: string;
             description?: string;
         };
+        MarkAllRead: {
+            marked_read: number;
+        };
+        MarkRead: {
+            marked_read: number;
+        };
+        Message: {
+            readonly id: number;
+            readonly conversation_id: number;
+            readonly sender_id: number;
+            body: string;
+            /**
+             * Read date
+             * Format: date-time
+             */
+            readonly read_at: string | null;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+        };
+        Notification: {
+            readonly id: number;
+            readonly type: components["schemas"]["TypeEnum"];
+            readonly payload: unknown;
+            /**
+             * Read date
+             * Format: date-time
+             */
+            readonly read_at: string | null;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+        };
         OpeningHours: {
             mon?: components["schemas"]["OpeningInterval"][];
             tue?: components["schemas"]["OpeningInterval"][];
@@ -455,6 +984,15 @@ export interface components {
         OpeningInterval: {
             from: string;
             to: string;
+        };
+        Participant: {
+            readonly id: number;
+            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
+            username: string;
+            first_name?: string;
+            last_name?: string;
+            /** Format: uri */
+            avatar?: string | null;
         };
         PatchedChangePassword: {
             old_password?: string;
@@ -474,6 +1012,8 @@ export interface components {
             /** @description Типы вещей, которые принимает пункт */
             item_type_ids?: number[];
             status?: components["schemas"]["ExchangePointStatusEnum"];
+            /** @description Расстояние в метрах, есть только при поиске с lat и lng */
+            readonly distance?: number | null;
             /**
              * Verification date
              * Format: date-time
@@ -505,6 +1045,15 @@ export interface components {
             exchange_format?: components["schemas"]["ExchangeFormatEnum"];
             status?: components["schemas"]["ItemStatusEnum"];
             district?: string;
+            /**
+             * Format: double
+             * @description Сохраняется с округлением примерно до 500 м
+             */
+            latitude?: number | null;
+            /** Format: double */
+            longitude?: number | null;
+            /** @description Расстояние в метрах, есть только при поиске с lat и lng */
+            readonly distance?: number | null;
             readonly photos?: components["schemas"]["ItemPhoto"][];
             /**
              * Creation date
@@ -516,6 +1065,38 @@ export interface components {
              * Format: date-time
              */
             readonly updated_at?: string;
+        };
+        PatchedReview: {
+            readonly id?: number;
+            /** @description Завершённая передача, в которой участвовал автор */
+            exchange_id?: number;
+            readonly item?: components["schemas"]["ItemBrief"];
+            readonly author?: components["schemas"]["Participant"];
+            readonly target_user_id?: number;
+            rating?: number;
+            comment?: string;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at?: string;
+        };
+        PatchedSubscription: {
+            readonly id?: number;
+            item_type?: number | null;
+            exchange_format?: components["schemas"]["ExchangeFormatEnum"] | components["schemas"]["BlankEnum"];
+            query?: string;
+            /** Format: double */
+            latitude?: number | null;
+            /** Format: double */
+            longitude?: number | null;
+            radius_km?: number | null;
+            is_active?: boolean;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at?: string;
         };
         PatchedUser: {
             readonly id?: number;
@@ -546,6 +1127,15 @@ export interface components {
              */
             readonly updated_at?: string;
         };
+        Rating: {
+            user_id: number;
+            /**
+             * Format: double
+             * @description Средняя оценка с одним знаком после запятой
+             */
+            average: number | null;
+            count: number;
+        };
         Register: {
             readonly id: number;
             /**
@@ -564,6 +1154,21 @@ export interface components {
              */
             readonly created_at: string;
         };
+        Review: {
+            readonly id: number;
+            /** @description Завершённая передача, в которой участвовал автор */
+            exchange_id: number;
+            readonly item: components["schemas"]["ItemBrief"];
+            readonly author: components["schemas"]["Participant"];
+            readonly target_user_id: number;
+            rating: number;
+            comment?: string;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+        };
         /**
          * @description * `user` - user
          *     * `moderator` - moderator
@@ -571,6 +1176,36 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "user" | "moderator" | "admin";
+        Subscription: {
+            readonly id: number;
+            item_type?: number | null;
+            exchange_format?: components["schemas"]["ExchangeFormatEnum"] | components["schemas"]["BlankEnum"];
+            query?: string;
+            /** Format: double */
+            latitude?: number | null;
+            /** Format: double */
+            longitude?: number | null;
+            radius_km?: number | null;
+            is_active?: boolean;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+        };
+        /**
+         * @description * `new_item` - new item by subscription
+         *     * `exchange_requested` - exchange requested
+         *     * `exchange_agreed` - exchange agreed
+         *     * `exchange_declined` - exchange declined
+         *     * `exchange_cancelled` - exchange cancelled
+         *     * `exchange_completed` - exchange completed
+         * @enum {string}
+         */
+        TypeEnum: "new_item" | "exchange_requested" | "exchange_agreed" | "exchange_declined" | "exchange_cancelled" | "exchange_completed";
+        UnreadCount: {
+            count: number;
+        };
         User: {
             readonly id: number;
             /**
@@ -609,6 +1244,148 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    conversations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"][];
+                };
+            };
+        };
+    };
+    conversations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Conversation"];
+                "application/x-www-form-urlencoded": components["schemas"]["Conversation"];
+                "multipart/form-data": components["schemas"]["Conversation"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+        };
+    };
+    conversations_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+        };
+    };
+    conversations_messages_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Message"][];
+                };
+            };
+        };
+    };
+    conversations_messages_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Message"];
+                "application/x-www-form-urlencoded": components["schemas"]["Message"];
+                "multipart/form-data": components["schemas"]["Message"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
+            };
+        };
+    };
+    conversations_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarkRead"];
+                };
+            };
+        };
+    };
     exchangePoints_list: {
         parameters: {
             query?: {
@@ -620,7 +1397,14 @@ export interface operations {
                  *     * `charity` - charity
                  */
                 exchange_format?: "charity" | "free" | "points";
-                item_type?: number;
+                item_type?: string;
+                item_type_id?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                lat?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                lng?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                radius?: number;
                 /** @description A search term. */
                 search?: string;
                 /**
@@ -715,6 +1499,195 @@ export interface operations {
             };
         };
     };
+    exchangePoints_bookmark_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+        };
+    };
+    exchangePoints_bookmark_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    exchanges_list: {
+        parameters: {
+            query?: {
+                /**
+                 * @description giver — я отдаю, receiver — я получаю
+                 *
+                 *     * `giver` - giver
+                 *     * `receiver` - receiver
+                 */
+                role?: "giver" | "receiver";
+                /**
+                 * @description * `requested` - requested
+                 *     * `agreed` - agreed
+                 *     * `completed` - completed
+                 *     * `declined` - declined
+                 *     * `cancelled` - cancelled
+                 */
+                status?: "agreed" | "cancelled" | "completed" | "declined" | "requested";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"][];
+                };
+            };
+        };
+    };
+    exchanges_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"];
+                };
+            };
+        };
+    };
+    exchanges_agree_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"];
+                };
+            };
+        };
+    };
+    exchanges_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"];
+                };
+            };
+        };
+    };
+    exchanges_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"];
+                };
+            };
+        };
+    };
+    exchanges_decline_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"];
+                };
+            };
+        };
+    };
     itemTypes_list: {
         parameters: {
             query?: never;
@@ -771,9 +1744,16 @@ export interface operations {
                  *     * `points` - points
                  */
                 exchange_format?: "free" | "points" | "swap";
-                item_type?: number;
+                item_type?: string;
+                item_type_id?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                lat?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                lng?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                radius?: number;
                 /** @description A search term. */
                 search?: string;
                 /**
@@ -822,6 +1802,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Item"];
+                };
+            };
+        };
+    };
+    items_exchanges_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"][];
+                };
+            };
+        };
+    };
+    items_exchanges_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exchange"];
                 };
             };
         };
@@ -918,6 +1940,55 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Item"];
                 };
+            };
+        };
+    };
+    items_bookmark_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+        };
+    };
+    items_bookmark_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1029,6 +2100,31 @@ export interface operations {
             };
         };
     };
+    me_bookmarks_list: {
+        parameters: {
+            query?: {
+                /**
+                 * @description * `item` - item
+                 *     * `point` - point
+                 */
+                type?: "item" | "point";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"][];
+                };
+            };
+        };
+    };
     me_change_password_update: {
         parameters: {
             query?: never;
@@ -1095,9 +2191,16 @@ export interface operations {
                  *     * `points` - points
                  */
                 exchange_format?: "free" | "points" | "swap";
-                item_type?: number;
+                item_type?: string;
+                item_type_id?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                lat?: number;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                lng?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
+                radius?: number;
                 /** @description A search term. */
                 search?: string;
                 /**
@@ -1121,6 +2224,314 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Item"][];
+                };
+            };
+        };
+    };
+    me_notifications_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"][];
+                };
+            };
+        };
+    };
+    me_notifications_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
+            };
+        };
+    };
+    me_notifications_read_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarkAllRead"];
+                };
+            };
+        };
+    };
+    me_notifications_unread_count_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadCount"];
+                };
+            };
+        };
+    };
+    me_subscriptions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"][];
+                };
+            };
+        };
+    };
+    me_subscriptions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["Subscription"];
+                "application/x-www-form-urlencoded": components["schemas"]["Subscription"];
+                "multipart/form-data": components["schemas"]["Subscription"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    me_subscriptions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    me_subscriptions_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_subscriptions_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSubscription"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSubscription"];
+                "multipart/form-data": components["schemas"]["PatchedSubscription"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    reviews_list: {
+        parameters: {
+            query?: {
+                /** @description Отзывы, написанные пользователем */
+                author?: number;
+                rating?: number;
+                /** @description Отзывы о пользователе */
+                target_user?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Review"][];
+                };
+            };
+        };
+    };
+    reviews_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Review"];
+                "application/x-www-form-urlencoded": components["schemas"]["Review"];
+                "multipart/form-data": components["schemas"]["Review"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Review"];
+                };
+            };
+        };
+    };
+    reviews_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Review"];
+                };
+            };
+        };
+    };
+    reviews_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    reviews_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedReview"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedReview"];
+                "multipart/form-data": components["schemas"]["PatchedReview"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Review"];
                 };
             };
         };
@@ -1220,6 +2631,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    users_rating_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Rating"];
                 };
             };
         };
