@@ -11,6 +11,7 @@ import {
   ArticlesPage,
   PointsPage,
   ChatsPage,
+  PointPage,
 } from "@/pages";
 import { useMe } from "./hooks";
 
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
       { path: "/item/:id", Component: ItemPage },
       { path: "/articles", Component: ArticlesPage },
       { path: "/points", Component: PointsPage },
+      { path: "/points/:id", Component: PointPage },
       { path: "*", Component: ErrorPage },
 
       {
