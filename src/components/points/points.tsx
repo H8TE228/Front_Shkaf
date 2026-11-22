@@ -215,7 +215,12 @@ export function Points() {
             Главная
           </Link>
           <ChevronRight />
-          <span>Пункты приёма</span>
+          <Link
+            to="/points"
+            className="hover:underline hover:underline-offset-4"
+          >
+            Пункты приёма
+          </Link>
         </nav>
 
         <div className="mb-6">
@@ -337,7 +342,7 @@ export function Points() {
                   {selected.address}
                 </p>
                 <span
-                  className="text-primary flex w-fit items-center gap-2 text-[13px] font-semibold data-[paused=true]:text-foreground [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
+                  className="text-primary data-[paused=true]:text-foreground flex w-fit items-center gap-2 text-[13px] font-semibold [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
                   data-paused={selected.status !== "active"}
                 >
                   <span />
@@ -371,7 +376,7 @@ export function Points() {
                           <button
                             type="button"
                             onClick={() => setSelectedId(point.id)}
-                            className="grid min-h-16 w-full grid-cols-[34px_minmax(0,1fr)_16px] items-center gap-2.5 rounded-[10px] p-2 text-left hover:bg-muted"
+                            className="hover:bg-muted grid min-h-16 w-full grid-cols-[34px_minmax(0,1fr)_16px] items-center gap-2.5 rounded-[10px] p-2 text-left"
                           >
                             <span className="bg-muted text-primary grid size-8.5 place-items-center rounded-[9px]">
                               <Icon className="size-4" />
@@ -416,7 +421,7 @@ export function Points() {
             <img
               src="/src/assets/images/ekaterinburg-map.png"
               alt=""
-              className="size-full object-cover opacity-[0.83] grayscale dark:invert dark:brightness-75"
+              className="size-full object-cover opacity-[0.83] grayscale dark:brightness-75 dark:invert"
             />
             {visible.map((point) => {
               const Icon = kindIcons[point.kind];
@@ -427,7 +432,7 @@ export function Points() {
                   key={point.id}
                   type="button"
                   onClick={() => setSelectedId(point.id)}
-                  className="text-secondary-foreground absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-primary bg-card data-[active=true]:border-card data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[paused=true]:border-dashed data-[paused=true]:border-muted-foreground data-[paused=true]:text-muted-foreground"
+                  className="text-secondary-foreground border-primary bg-card data-[active=true]:border-card data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[paused=true]:border-muted-foreground data-[paused=true]:text-muted-foreground absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] data-[paused=true]:border-dashed"
                   data-active={active}
                   data-paused={paused}
                   style={{ left: `${point.x}%`, top: `${point.y}%` }}
@@ -443,7 +448,7 @@ export function Points() {
               return (
                 <span
                   key={value}
-                  className="text-muted-foreground flex items-center gap-2 text-[13px] [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-primary"
+                  className="text-muted-foreground [&_svg]:text-primary flex items-center gap-2 text-[13px] [&_svg]:size-4 [&_svg]:shrink-0"
                 >
                   <Icon />
                   {text}

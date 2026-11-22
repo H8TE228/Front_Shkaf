@@ -30,7 +30,7 @@ export function LocationButton() {
       localStorage.setItem(STORAGE_KEY_LOCATION_ATTEMPTED, "true");
       handleGetLocation();
     }
-  }, []);
+  }, [location]);
 
   function handleGetLocation() {
     if (!navigator.geolocation) {
