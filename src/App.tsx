@@ -10,6 +10,7 @@ import {
   RegisterPage,
   ArticlesPage,
   PointsPage,
+  ChatsPage,
   PointPage,
 } from "@/pages";
 import { useMe } from "./hooks";
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             Component: ProfilePage,
+          },
+          {
+            path: "/chats",
+            Component: ChatsPage,
           },
         ],
       },
