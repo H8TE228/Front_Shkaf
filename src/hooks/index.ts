@@ -4,5 +4,6 @@ export * from "./items";
 export * from "./item-types";
 export * from "./exchange-points";
 export * from "./me";
+export * from "./bookmarks";
 export * from "./mobile-search";
 export * from "./conversations";

@@ -1,0 +1,17 @@
+import { bookmarksQueries } from "@/api";
+import { queryClient } from "@/lib";
+import type { TBookmark } from "@/types";
+import { useMutation } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+
+export function useCreateExchangePointBookmark() {
+  return useMutation<TBookmark, AxiosError, string>({
+    mutationFn: bookmarksQueries.createExchangePointBookmark,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+    },
+    onError: (error) => {
+      console.error("Ошибка при добавлении пункта в избранное", error);
+    },
+  });
+}

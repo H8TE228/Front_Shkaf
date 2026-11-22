@@ -7,5 +7,6 @@ export * from "./catalog/catalog-page";
 export * from "./item/item-page.tsx";
 export * from "./articles/articles-page.tsx";
 export * from "./points/points-page.tsx";
+export * from "./favorites/favorites-page.tsx";
 export * from "./chats/chats-page";
 export * from "./point/point-page";

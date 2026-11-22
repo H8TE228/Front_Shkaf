@@ -61,6 +61,27 @@ export type TExchangePointUpdateRequest = Partial<TExchangePointCreateRequest>;
 export type TExchangePointsQueryParams =
   operations["exchangePoints_list"]["parameters"]["query"];
 
+export type TBookmarkItem = TItem & {
+  latitude: number | null;
+  longitude: number | null;
+  distance: number | null;
+};
+
+export type TBookmarkExchangePoint = TExchangePoint & {
+  distance: number | null;
+};
+
+export type TBookmark = {
+  id: number;
+  created_at: string;
+  item: TBookmarkItem | null;
+  point: TBookmarkExchangePoint | null;
+};
+
+export type TBookmarkType = "item" | "point";
+
+export type TBookmarksQueryParams = {
+  type?: TBookmarkType;
 export type TConversationItem = {
   id: number;
   title: string;

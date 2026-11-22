@@ -10,6 +10,7 @@ import {
   RegisterPage,
   ArticlesPage,
   PointsPage,
+  FavoritesPage,
   ChatsPage,
   PointPage,
 } from "@/pages";
@@ -43,6 +44,8 @@ const router = createBrowserRouter([
             Component: ProfilePage,
           },
           {
+            path: "/favorites",
+            Component: FavoritesPage,
             path: "/chats",
             Component: ChatsPage,
           },
