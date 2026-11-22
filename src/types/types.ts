@@ -82,4 +82,50 @@ export type TBookmarkType = "item" | "point";
 
 export type TBookmarksQueryParams = {
   type?: TBookmarkType;
+export type TConversationItem = {
+  id: number;
+  title: string;
+  status: components["schemas"]["ItemStatusEnum"];
+  cover: string;
+};
+
+export type TConversationCompanion = {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  avatar: string;
+};
+
+export type TConversationMessage = {
+  id: number;
+  conversation_id: number;
+  sender_id: number;
+  body: string;
+  read_at: string;
+  created_at: string;
+};
+
+export type TConversation = {
+  id: number;
+  item: TConversationItem;
+  owner_id: number;
+  requester_id: number;
+  companion: TConversationCompanion;
+  last_message: TConversationMessage | null;
+  unread_count: number;
+  created_at: string;
+};
+
+export type TConversationCreateRequest = {
+  item_id: number;
+};
+
+export type TConversationMessageCreateRequest = {
+  id: string;
+  body: string;
+};
+
+export type TConversationReadResponse = {
+  marked_read: number;
 };
