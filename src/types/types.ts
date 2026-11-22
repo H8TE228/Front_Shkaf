@@ -82,6 +82,8 @@ export type TBookmarkType = "item" | "point";
 
 export type TBookmarksQueryParams = {
   type?: TBookmarkType;
+};
+
 export type TConversationItem = {
   id: number;
   title: string;

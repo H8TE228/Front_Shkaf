@@ -46,9 +46,8 @@ const router = createBrowserRouter([
           {
             path: "/favorites",
             Component: FavoritesPage,
-            path: "/chats",
-            Component: ChatsPage,
           },
+          { path: "/chats", Component: ChatsPage },
         ],
       },
     ],
