@@ -120,7 +120,7 @@ export type TConversation = {
 };
 
 export type TConversationCreateRequest = {
-  item_id: number;
+  item_id: string;
 };
 
 export type TConversationMessageCreateRequest = {
