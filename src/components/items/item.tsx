@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import {
+  Component,
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Camera,
   ChevronRight,
+  Flag,
   Heart,
   MapPin,
-  MapPinned,
   MessageCircle,
-  Repeat2,
-  ShieldCheck,
+  Share2,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -19,26 +25,24 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "../ui/carousel";
+import { ItemCard } from "../item-card";
+import { UserAvatar } from "../profile/user-avatar";
 import {
   useBookmarks,
   useCreateConversation,
   useCreateItemBookmark,
   useDeleteItemBookmark,
   useItemById,
+  useItems,
   useMe,
+  useUsers,
 } from "@/hooks";
-import type { TItem, TItemPhoto } from "@/types";
+import type { TItem, TItemPhoto, TUser } from "@/types";
 
 const exchangeFormatTitle = {
   free: "Бесплатно",
   swap: "Обмен",
   points: "За баллы",
-} as const;
-
-const exchangeFormatText = {
-  free: "Вещь можно забрать бесплатно.",
-  swap: "Владелец предлагает обмен на другую вещь.",
-  points: "Вещь можно получить за баллы.",
 } as const;
 
 const conditionTitle = {
@@ -47,54 +51,73 @@ const conditionTitle = {
   used: "Б/у",
 } as const;
 
-const statusTitle = {
-  draft: "Черновик",
-  active: "Доступна",
-  reserved: "Зарезервирована",
-  given: "Передана",
-  archived: "В архиве",
-} as const;
-
-const months = [
-  "января",
-  "февраля",
-  "марта",
-  "апреля",
-  "мая",
-  "июня",
-  "июля",
-  "августа",
-  "сентября",
-  "октября",
-  "ноября",
-  "декабря",
-];
-
-function formatDate(iso: string) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = months[date.getMonth()];
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${day} ${month} ${hours}:${minutes}`;
+function personName(person: {
+  first_name?: string | null;
+  username?: string | null;
+}) {
+  const first = person.first_name?.trim();
+  if (first) return first;
+  return person.username?.trim() ?? "";
 }
 
-function yandexMapsHref(item: TItem) {
-  const { longitude, latitude } = item;
+function hasCoordinates(item: TItem) {
+  return (
+    item.latitude != null &&
+    item.longitude != null &&
+    Number.isFinite(item.latitude) &&
+    Number.isFinite(item.longitude)
+  );
+}
 
-  if (
-    longitude == null ||
-    latitude == null ||
-    !Number.isFinite(longitude) ||
-    !Number.isFinite(latitude)
-  ) {
-    return null;
+const YandexPreview = lazy(async () => {
+  const maps = await import("@/lib/ymaps3");
+
+  function Preview({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) {
+    const center: [number, number] = [longitude, latitude];
+
+    return (
+      <div className="h-55 overflow-hidden rounded-xl">
+        <maps.YMap
+          location={maps.reactify.useDefault(
+            { center, zoom: 14 },
+            [longitude, latitude],
+          )}
+        >
+          <maps.YMapDefaultSchemeLayer />
+          <maps.YMapDefaultFeaturesLayer />
+          <maps.YMapMarker
+            coordinates={maps.reactify.useDefault(center, [longitude, latitude])}
+          >
+            <div className="bg-primary border-card size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 shadow" />
+          </maps.YMapMarker>
+        </maps.YMap>
+      </div>
+    );
   }
 
-  return `https://yandex.ru/maps/?pt=${longitude},${latitude}&z=16&l=map`;
+  return { default: Preview };
+});
+
+class MapBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) return null;
+    return this.props.children;
+  }
 }
 
 export function Item() {
@@ -103,6 +126,8 @@ export function Item() {
   const [favoritePrompt, setFavoritePrompt] = useState(false);
   const { data: user, isLoading: meLoading } = useMe();
   const { data: item, isLoading, isError } = useItemById(id ?? "");
+  const { data: items } = useItems();
+  const { data: users, isError: usersError } = useUsers();
   const { data: bookmarks } = useBookmarks({ type: "item" });
   const { mutate: createBookmark, isPending: createPending } =
     useCreateItemBookmark();
@@ -117,6 +142,13 @@ export function Item() {
   );
   const isOwner = !!user && user.id === item?.owner_id;
   const ready = !isLoading && !isError && !!item;
+  const owner = users?.find((entry) => entry.id === item?.owner_id);
+  const ownerName = !usersError && owner ? personName(owner) : "";
+  const similar = (items ?? [])
+    .filter(
+      (entry) => entry.id !== item?.id && entry.item_type === item?.item_type,
+    )
+    .slice(0, 4);
 
   function onFavoriteClick() {
     if (meLoading || bookmarkPending || !item) return;
@@ -155,6 +187,27 @@ export function Item() {
     );
   }
 
+  async function onShare() {
+    if (!item) return;
+
+    const url = new URL(`/item/${item.id}`, window.location.origin).toString();
+
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: item.title, url });
+      } catch {
+        return;
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      return;
+    }
+  }
+
   return (
     <div>
       <section
@@ -189,18 +242,43 @@ export function Item() {
 
         {ready && (
           <>
-            <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div className="min-w-0">
                 <h1 className="text-[32px] leading-10 font-semibold tracking-tight">
                   {item.title}
                 </h1>
-                <p className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-2 text-sm">
-                  <span className="flex items-center gap-2 [&_svg]:size-4 [&_svg]:shrink-0">
-                    <Repeat2 />
-                    {exchangeFormatTitle[item.exchange_format]}
-                  </span>
-                  {item.district && <span className="ml-3">{item.district}</span>}
-                </p>
+                {item.district && (
+                  <p className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-sm leading-5">
+                    <MapPin className="text-primary size-5 shrink-0" />
+                    {item.district}
+                  </p>
+                )}
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="В избранное"
+                  aria-pressed={bookmarked}
+                  disabled={meLoading || bookmarkPending}
+                  onClick={onFavoriteClick}
+                  className="size-11 rounded-lg"
+                >
+                  <Heart
+                    className={`size-5 ${bookmarked ? "fill-current text-primary" : ""}`}
+                  />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Поделиться"
+                  onClick={onShare}
+                  className="size-11 rounded-lg"
+                >
+                  <Share2 className="size-5" />
+                </Button>
               </div>
             </div>
 
@@ -223,6 +301,8 @@ export function Item() {
       {ready && (
         <ItemDetails
           item={item}
+          owner={usersError ? undefined : owner}
+          ownerName={ownerName}
           isOwner={isOwner}
           meLoading={meLoading}
           conversationPending={conversationPending}
@@ -230,7 +310,19 @@ export function Item() {
           bookmarked={bookmarked}
           favoriteDisabled={meLoading || bookmarkPending}
           onFavoriteClick={onFavoriteClick}
+          onShare={onShare}
         />
+      )}
+
+      {ready && similar.length > 0 && (
+        <section className="mx-auto mt-8 mb-12 w-full max-w-[1550px] px-6 lg:px-0">
+          <h2 className="text-2xl font-semibold">Похожие вещи</h2>
+          <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+            {similar.map((entry) => (
+              <ItemCard item={entry} key={entry.id} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );
@@ -238,6 +330,8 @@ export function Item() {
 
 function ItemDetails({
   item,
+  owner,
+  ownerName,
   isOwner,
   meLoading,
   conversationPending,
@@ -245,8 +339,11 @@ function ItemDetails({
   bookmarked,
   favoriteDisabled,
   onFavoriteClick,
+  onShare,
 }: {
   item: TItem;
+  owner?: TUser;
+  ownerName: string;
   isOwner: boolean;
   meLoading: boolean;
   conversationPending: boolean;
@@ -254,141 +351,135 @@ function ItemDetails({
   bookmarked: boolean;
   favoriteDisabled: boolean;
   onFavoriteClick: () => void;
+  onShare: () => void;
 }) {
-  const status = item.status ?? "active";
-  const paused = status !== "active";
-  const mapHref = yandexMapsHref(item);
-  const published = formatDate(item.created_at);
-  const specs = [
-    item.item_type_title
-      ? { label: "Тип", value: item.item_type_title }
-      : null,
-    { label: "Состояние", value: conditionTitle[item.condition] },
-    item.size ? { label: "Размер", value: item.size } : null,
-    item.district ? { label: "Район", value: item.district } : null,
-  ].filter((spec) => spec !== null);
+  const showMap = hasCoordinates(item);
 
   return (
-    <section className="mx-auto mb-12 grid w-full max-w-[1550px] grid-cols-1 gap-5 px-6 lg:grid-cols-[7fr_5fr] lg:px-0">
+    <section className="mx-auto mb-12 grid w-full max-w-[1550px] grid-cols-1 items-start gap-5 px-6 lg:grid-cols-[7fr_5fr] lg:px-0">
       <div className="grid content-start gap-5">
-        <ItemGallery
-          photos={item.photos}
-          title={item.title}
-          bookmarked={bookmarked}
-          favoriteDisabled={favoriteDisabled}
-          onFavoriteClick={onFavoriteClick}
-        />
+        <ItemGallery photos={item.photos} title={item.title} />
 
-        <section className="border-border bg-card grid content-start gap-4 rounded-2xl border p-5">
-          <h2 className="text-2xl leading-7 font-semibold">Описание</h2>
-          <p className="text-muted-foreground max-w-[62ch] text-sm leading-relaxed whitespace-pre-wrap">
+        <section className="grid content-start gap-3">
+          <h2 className="text-2xl font-semibold">Описание</h2>
+          <p className="text-base leading-[27px] whitespace-pre-wrap">
             {item.description?.trim() || "Описание отсутствует."}
           </p>
+        </section>
 
-          <h2 className="text-2xl leading-7 font-semibold">Характеристики</h2>
-          <dl className="grid gap-3">
-            {specs.map((spec) => (
-              <div key={spec.label} className="grid gap-1">
-                <dt className="text-muted-foreground text-sm">{spec.label}</dt>
-                <dd className="text-[15px] font-medium">{spec.value}</dd>
-              </div>
-            ))}
+        <section className="grid content-start gap-3">
+          <h2 className="text-2xl font-semibold">Характеристики</h2>
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-8 gap-y-2 text-sm leading-5">
+            <dt className="text-muted-foreground">Состояние</dt>
+            <dd>{conditionTitle[item.condition]}</dd>
+            {item.size && (
+              <>
+                <dt className="text-muted-foreground">Размер</dt>
+                <dd>{item.size}</dd>
+              </>
+            )}
           </dl>
+        </section>
 
-          <h2 className="text-2xl leading-7 font-semibold">Местоположение</h2>
-          <p className="text-muted-foreground text-sm">
-            {item.district || "Местоположение не указано."}
-          </p>
-          {mapHref && (
-            <a
-              href={mapHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary inline-flex w-fit items-center gap-1 text-sm font-medium hover:underline hover:underline-offset-4 [&_svg]:size-4 [&_svg]:shrink-0"
-            >
-              <MapPinned /> Показать на карте
-            </a>
+        <section className="border-border grid content-start gap-3 rounded-2xl border p-6">
+          <h2 className="text-2xl font-semibold">Местоположение</h2>
+          {item.district && (
+            <p className="flex items-center gap-2">
+              <MapPin className="text-primary size-5 shrink-0" />
+              {item.district}
+            </p>
           )}
-
-          <p className="text-muted-foreground text-xs">
-            № {item.id}
-            {published ? ` | ${published}` : ""}
+          <p className="text-muted-foreground text-sm leading-5">
+            Точное место передачи обсудите в чате.
           </p>
+          {showMap && (
+            <MapBoundary>
+              <Suspense fallback={null}>
+                <YandexPreview
+                  latitude={item.latitude as number}
+                  longitude={item.longitude as number}
+                />
+              </Suspense>
+            </MapBoundary>
+          )}
         </section>
       </div>
 
-      <div className="grid content-start gap-5">
-        <div className="border-border bg-card grid content-start justify-items-start gap-4 rounded-2xl border p-5">
-          <span
-            className="text-primary flex w-fit items-center gap-2 text-[13px] font-semibold data-[paused=true]:text-foreground [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
-            data-paused={paused}
-          >
-            <span />
-            {statusTitle[status]}
-          </span>
-
-          <div>
-            <h2 className="text-2xl leading-7 font-semibold">
-              {exchangeFormatTitle[item.exchange_format]}
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {exchangeFormatText[item.exchange_format]}
-            </p>
+      <aside className="top-24 [@media(min-width:1024px)_and_(min-height:601px)]:sticky">
+        <div className="border-border bg-card grid content-start gap-4 rounded-2xl border p-6">
+          <div className="flex items-center gap-3">
+            {owner && (owner.avatar || ownerName) ? (
+              <UserAvatar
+                src={owner.avatar}
+                name={ownerName}
+                className="size-12 text-lg"
+              />
+            ) : (
+              <span className="bg-muted size-12 shrink-0 rounded-full" />
+            )}
+            <div className="min-w-0">
+              {ownerName && (
+                <p className="truncate font-semibold">{ownerName}</p>
+              )}
+              <p className="text-muted-foreground text-sm leading-5">
+                Владелец вещи
+              </p>
+            </div>
           </div>
 
-          {item.district && (
-            <div className="flex items-center gap-2.5">
-              <MapPin className="text-primary size-5 shrink-0" />
-              <div>
-                <span className="text-muted-foreground text-sm">Район</span>
-                <p className="text-2xl leading-7 font-semibold">{item.district}</p>
-              </div>
-            </div>
-          )}
-
-          <dl className="flex flex-wrap gap-x-9 gap-y-2.5">
-            <div>
-              <dt className="text-muted-foreground text-sm">Состояние</dt>
-              <dd className="mt-1 text-[15px] font-medium">
-                {conditionTitle[item.condition]}
-              </dd>
-            </div>
-            {item.size && (
-              <div>
-                <dt className="text-muted-foreground text-sm">Размер</dt>
-                <dd className="mt-1 text-[15px] font-medium">{item.size}</dd>
-              </div>
-            )}
-            {item.item_type_title && (
-              <div>
-                <dt className="text-muted-foreground text-sm">Тип</dt>
-                <dd className="mt-1 text-[15px] font-medium">
-                  {item.item_type_title}
-                </dd>
-              </div>
-            )}
-          </dl>
+          <p className="text-[32px] leading-10 font-semibold">
+            {exchangeFormatTitle[item.exchange_format]}
+          </p>
 
           {!meLoading && !isOwner && (
             <Button
               type="button"
               disabled={conversationPending}
               onClick={onWriteClick}
-              className="h-12 px-5 text-base font-medium"
+              className="h-12 w-full rounded-xl text-base font-medium"
             >
-              <MessageCircle /> Написать
+              <MessageCircle className="size-5" /> Написать владельцу
             </Button>
           )}
-        </div>
 
-        <div className="border-border bg-card flex items-start gap-3 rounded-2xl border p-5">
-          <ShieldCheck className="text-primary mt-0.5 size-4 shrink-0" />
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Будьте внимательны при передаче вещей. Договаривайтесь о встрече в
-            переписке и не передавайте личные данные заранее.
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              aria-pressed={bookmarked}
+              disabled={favoriteDisabled}
+              onClick={onFavoriteClick}
+              className="h-12 rounded-xl"
+            >
+              <Heart
+                className={`size-5 ${bookmarked ? "fill-current text-primary" : ""}`}
+              />
+              В избранное
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onShare}
+              className="h-12 rounded-xl"
+            >
+              <Share2 className="size-5" />
+              Поделиться
+            </Button>
+          </div>
+
+          <p className="text-muted-foreground text-sm leading-5">
+            Время и место встречи обсудите в чате.
           </p>
+
+          <button
+            type="button"
+            className="text-muted-foreground inline-flex w-fit items-center gap-2 text-[13px]"
+          >
+            <Flag className="size-5 shrink-0" />
+            Пожаловаться
+          </button>
         </div>
-      </div>
+      </aside>
     </section>
   );
 }
@@ -396,15 +487,9 @@ function ItemDetails({
 function ItemGallery({
   photos,
   title,
-  bookmarked,
-  favoriteDisabled,
-  onFavoriteClick,
 }: {
   photos: TItemPhoto[];
   title: string;
-  bookmarked: boolean;
-  favoriteDisabled: boolean;
-  onFavoriteClick: () => void;
 }) {
   const slides = [...photos].sort((a, b) => a.position - b.position);
   const [api, setApi] = useState<CarouselApi>();
@@ -428,22 +513,14 @@ function ItemGallery({
 
   return (
     <div className="grid content-start gap-3">
-      <div className="bg-border relative aspect-[4/3] min-h-64 overflow-hidden rounded-2xl">
+      <div className="bg-muted relative aspect-[4/3] overflow-hidden rounded-2xl">
         {slides.length === 0 && (
-          <div className="text-muted-foreground absolute inset-0 flex flex-col items-center justify-center gap-2 text-[13px] [&_svg]:size-9">
-            <Camera />
+          <div className="text-muted-foreground absolute inset-0 flex items-center justify-center">
+            <Camera className="size-9" />
           </div>
         )}
 
-        {slides.length === 1 && (
-          <img
-            src={slides[0].image}
-            alt={title}
-            className="absolute inset-0 size-full object-cover"
-          />
-        )}
-
-        {several && (
+        {slides.length > 0 && (
           <Carousel setApi={setApi} className="absolute inset-0">
             <CarouselContent className="ml-0 h-full">
               {slides.map((photo) => (
@@ -456,47 +533,37 @@ function ItemGallery({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="top-1/2 left-3 -translate-y-1/2" />
-            <CarouselNext className="top-1/2 right-3 -translate-y-1/2" />
+            {several && (
+              <>
+                <CarouselPrevious className="top-1/2 left-3 size-11 -translate-y-1/2 rounded-lg" />
+                <CarouselNext className="top-1/2 right-3 size-11 -translate-y-1/2 rounded-lg" />
+              </>
+            )}
           </Carousel>
         )}
 
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          aria-label="В избранное"
-          aria-pressed={bookmarked}
-          disabled={favoriteDisabled}
-          onClick={onFavoriteClick}
-          className="bg-card absolute top-3 right-3 rounded-xl"
-        >
-          <Heart className={bookmarked ? "fill-current text-primary" : ""} />
-        </Button>
-
-        {!!slides.length && (
-          <span className="bg-card/80 pointer-events-none absolute bottom-3 left-3 rounded-xl px-2.5 py-1 text-xs font-medium">
+        {slides.length > 0 && (
+          <span className="bg-card/80 pointer-events-none absolute top-3 right-3 rounded-lg px-2 py-1 text-xs">
             {current + 1} / {slides.length}
           </span>
         )}
       </div>
 
-      {several && (
+      {slides.length > 0 && (
         <div className="flex gap-2 overflow-x-auto">
           {slides.map((photo, index) => (
-            <Button
+            <button
               key={photo.id}
               type="button"
-              variant="outline"
               aria-label={`Фото ${index + 1}`}
               aria-pressed={index === current}
               onClick={() => api?.scrollTo(index)}
-              className={`size-16 overflow-hidden rounded-xl p-0 ${
-                index === current ? "border-primary" : "opacity-60"
+              className={`size-20 shrink-0 overflow-hidden rounded-xl border-2 ${
+                index === current ? "border-primary" : "border-border opacity-60"
               }`}
             >
               <img src={photo.image} alt="" className="size-full object-cover" />
-            </Button>
+            </button>
           ))}
         </div>
       )}
