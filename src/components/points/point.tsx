@@ -59,7 +59,13 @@ export function Point() {
             Пункты приёма
           </Link>
           <ChevronRight />
-          <span>Карточка пункта</span>
+          {/* сделать по id  */}
+          <Link
+            to="/points"
+            className="hover:underline hover:underline-offset-4"
+          >
+            Карточка пункта
+          </Link>
         </nav>
 
         <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -108,7 +114,7 @@ export function Point() {
 
         <div className="border-border bg-card grid content-start justify-items-start gap-4 rounded-2xl border p-5">
           <span
-            className="text-primary flex w-fit items-center gap-2 text-[13px] font-semibold data-[paused=true]:text-foreground [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
+            className="text-primary data-[paused=true]:text-foreground flex w-fit items-center gap-2 text-[13px] font-semibold [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
             data-paused={paused}
           >
             <span />
@@ -184,7 +190,7 @@ export function Point() {
             <img
               src="/src/assets/images/ekaterinburg-map.png"
               alt=""
-              className="size-full object-cover opacity-[0.83] grayscale dark:invert dark:brightness-75"
+              className="size-full object-cover opacity-[0.83] grayscale dark:brightness-75 dark:invert"
             />
           </div>
           <div className="text-muted-foreground flex items-center gap-2 px-3.5 py-2.5 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
