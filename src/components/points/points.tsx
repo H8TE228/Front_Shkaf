@@ -5,13 +5,26 @@ import { Button } from "../ui/button";
 import { useExchangePoints, useItemTypes } from "@/hooks";
 import { getCurrentDay } from "@/lib";
 import { getSavedCoordinates } from "@/lib/get-saved-coords";
-import { STORAGE_KEY_LOCATION, STORAGE_KEY_USER_LOCATION_UPDATED_EVENT } from "@/constants";
-import type { TExchangePoint, TExchangePointsQueryParams, TLocationData } from "@/types";
+import {
+  STORAGE_KEY_LOCATION,
+  STORAGE_KEY_USER_LOCATION_UPDATED_EVENT,
+} from "@/constants";
+import type {
+  TExchangePoint,
+  TExchangePointsQueryParams,
+  TLocationData,
+} from "@/types";
 
 const formatLabels = {
   free: "Бесплатно",
   points: "За баллы",
   charity: "Благотворительность",
+} as const;
+
+const pointStatus = {
+  active: "Принимает",
+  needs_check: "Нужна проверка",
+  closed: "Приём закрыт",
 } as const;
 
 const yekaterinburgCenter: [number, number] = [60.597465, 56.838011];
@@ -41,7 +54,8 @@ function todayHours(point: TExchangePoint) {
     point.opening_hours?.[currentDay as keyof typeof point.opening_hours];
 
   return (
-    openingHours?.map(({ from, to }) => `${from}–${to}`).join(", ") || "выходной"
+    openingHours?.map(({ from, to }) => `${from}–${to}`).join(", ") ||
+    "выходной"
   );
 }
 
@@ -64,7 +78,9 @@ function pointsCenter(points: TExchangePoint[]): [number, number] | null {
 }
 
 function addressLine(point: TExchangePoint) {
-  return [point.address.street, point.address.building].filter(Boolean).join(", ");
+  return [point.address.street, point.address.building]
+    .filter(Boolean)
+    .join(", ");
 }
 
 export function Points() {
@@ -80,7 +96,9 @@ export function Points() {
   const query: NonNullable<TExchangePointsQueryParams> = {};
   if (savedCity) query.city = savedCity;
   if (itemType) query.item_type = itemType;
-  if (format) query.exchange_format = format as NonNullable<TExchangePointsQueryParams>["exchange_format"];
+  if (format)
+    query.exchange_format =
+      format as NonNullable<TExchangePointsQueryParams>["exchange_format"];
   if (status === "accepting") query.status = "active";
 
   const { data, isLoading, isError } = useExchangePoints(query);
@@ -101,7 +119,10 @@ export function Points() {
       setSavedCenter(readSavedCenter());
     };
 
-    window.addEventListener(STORAGE_KEY_USER_LOCATION_UPDATED_EVENT, updateLocation);
+    window.addEventListener(
+      STORAGE_KEY_USER_LOCATION_UPDATED_EVENT,
+      updateLocation,
+    );
     return () => {
       window.removeEventListener(
         STORAGE_KEY_USER_LOCATION_UPDATED_EVENT,
@@ -257,7 +278,9 @@ export function Points() {
                 </span>
                 <p className="text-secondary-foreground flex flex-wrap gap-x-3 gap-y-1 text-[13px]">
                   <span>{todayHours(selected)}</span>
-                  {selectedFormat && <span>{formatLabels[selectedFormat]}</span>}
+                  {selectedFormat && (
+                    <span>{formatLabels[selectedFormat]}</span>
+                  )}
                 </p>
                 <Button
                   type="button"
@@ -276,7 +299,7 @@ export function Points() {
                         <button
                           type="button"
                           onClick={() => setSelectedId(point.id)}
-                          className="grid min-h-16 w-full grid-cols-[34px_minmax(0,1fr)_16px] items-center gap-2.5 rounded-[10px] p-2 text-left hover:bg-muted"
+                          className="hover:bg-muted grid min-h-16 w-full grid-cols-[34px_minmax(0,1fr)_16px] items-center gap-2.5 rounded-[10px] p-2 text-left"
                         >
                           <span className="bg-muted text-primary grid size-8.5 place-items-center rounded-[9px]">
                             <MapPin className="size-4" />
@@ -327,14 +350,20 @@ export function Points() {
             />
           </div>
           <div className="border-border flex flex-wrap gap-x-5.5 gap-y-2.5 border-t px-4 py-3">
-            <span className="text-muted-foreground flex items-center gap-2 text-[13px]">
-              <span className="size-4 rounded-full border-[1.5px] border-primary bg-card" />
-              Принимает
-            </span>
-            <span className="text-muted-foreground flex items-center gap-2 text-[13px]">
-              <span className="size-4 rounded-full border-[1.5px] border-dashed border-current" />
-              Приём приостановлен
-            </span>
+            {selected && (
+              <span className="text-muted-foreground flex items-center gap-2 text-[13px]">
+                <span
+                  className={`size-4 rounded-full border-[1.5px] ${
+                    selected.status === "active"
+                      ? "border-primary bg-card"
+                      : "border-dashed border-current"
+                  }`}
+                />
+                {selected.status
+                  ? pointStatus[selected.status]
+                  : "Статус не указан"}
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -458,7 +487,7 @@ function PointMarker({
           active
             ? "border-card bg-primary text-primary-foreground"
             : paused
-              ? "text-muted-foreground border-dashed border-muted-foreground bg-card"
+              ? "text-muted-foreground border-muted-foreground bg-card border-dashed"
               : "text-secondary-foreground border-primary bg-card"
         } ${active && paused ? "border-dashed" : ""}`}
       >

@@ -10,11 +10,7 @@ import {
   useDeleteItemBookmark,
 } from "@/hooks";
 import { getCurrentDay } from "@/lib";
-import type {
-  TBookmarkExchangePoint,
-  TBookmarkItem,
-  TBookmarkType,
-} from "@/types";
+import type { TBookmarkExchangePoint, TBookmarkType, TItem } from "@/types";
 
 const exchangeFormatTitle = {
   free: "Бесплатно",
@@ -68,11 +64,13 @@ export function Favorites() {
     isLoading: itemsLoading,
     isError: itemsError,
   } = useBookmarks({ type: "item" });
+  const itemBookmarksData = itemBookmarks?.results;
   const {
     data: pointBookmarks,
     isLoading: pointsLoading,
     isError: pointsError,
   } = useBookmarks({ type: "point" });
+  const pointBookmarksData = pointBookmarks?.results;
   const { mutate: deleteItemBookmark } = useDeleteItemBookmark();
   const { mutate: deletePointBookmark } = useDeleteExchangePointBookmark();
   const { mutate: createItemBookmark } = useCreateItemBookmark();
@@ -81,7 +79,7 @@ export function Favorites() {
   const isItems = tab === "item";
   const isLoading = isItems ? itemsLoading : pointsLoading;
   const isError = isItems ? itemsError : pointsError;
-  const bookmarks = isItems ? itemBookmarks : pointBookmarks;
+  const bookmarks = isItems ? itemBookmarksData : pointBookmarksData;
 
   useEffect(() => {
     if (!undo) return;
@@ -111,8 +109,8 @@ export function Favorites() {
   }
 
   const tabs: [TBookmarkType, string, number][] = [
-    ["item", "Вещи", itemBookmarks?.length ?? 0],
-    ["point", "Пункты приёма", pointBookmarks?.length ?? 0],
+    ["item", "Вещи", itemBookmarksData?.length ?? 0],
+    ["point", "Пункты приёма", pointBookmarksData?.length ?? 0],
   ];
 
   return (
@@ -194,7 +192,7 @@ export function Favorites() {
           >
             <ul className="divide-border divide-y">
               {isItems
-                ? itemBookmarks?.map((bookmark) =>
+                ? itemBookmarksData?.map((bookmark) =>
                     bookmark.item ? (
                       <ItemRow
                         key={bookmark.id}
@@ -204,7 +202,7 @@ export function Favorites() {
                       />
                     ) : null,
                   )
-                : pointBookmarks?.map((bookmark) =>
+                : pointBookmarksData?.map((bookmark) =>
                     bookmark.point ? (
                       <PointRow
                         key={bookmark.id}
@@ -244,7 +242,7 @@ function ItemRow({
   pending,
   onRemove,
 }: {
-  item: TBookmarkItem;
+  item: TItem;
   pending: boolean;
   onRemove: () => void;
 }) {

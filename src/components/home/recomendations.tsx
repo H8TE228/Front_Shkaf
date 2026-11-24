@@ -7,7 +7,7 @@ export function Recomendations() {
   const navigate = useNavigate();
 
   // * в дальнейшем тут будет ручкка на рекомендации
-  const { data: items, isLoading, isError } = useItems();
+  const { data: items, isLoading, isError } = useItems({ page_size: 12 });
 
   return (
     <section className="mx-auto w-full max-w-[1550px] px-6 pt-16 lg:px-0">
@@ -19,13 +19,13 @@ export function Recomendations() {
 
       {!isLoading && isError && <span>Ошибка загрузки данных</span>}
 
-      {!isLoading && !isError && items?.length === 0 && (
+      {!isLoading && !isError && items?.results.length === 0 && (
         <span>Нет доступных вещей</span>
       )}
 
-      {!isLoading && !isError && items?.length && (
+      {!isLoading && !isError && items?.results.length && (
         <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {items?.map((item) => (
+          {items.results.map((item) => (
             <ItemCard item={item} key={item.id} />
           ))}
         </div>

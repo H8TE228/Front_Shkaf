@@ -1,8 +1,8 @@
 import type { TItemsQueryParams } from "@/types";
 import { getSavedCoordinates } from "@/lib/get-saved-coords";
-import { useItemTypes, useItems } from "@/hooks";
+import { useInfiniteItems, useItemTypes } from "@/hooks";
 import { ChevronRight, X } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ItemCard } from "../item-card";
 import { Button } from "../ui/button";
@@ -28,13 +28,13 @@ const filterParams = ["exchange_format", "item_type_id", "condition", "radius"];
 
 function isExchangeFormat(
   value: string | null,
-): value is NonNullable<TItemsQueryParams["exchange_format"]> {
+): value is NonNullable<NonNullable<TItemsQueryParams>["exchange_format"]> {
   return exchangeFormats.some((format) => format.value === value);
 }
 
 function isCondition(
   value: string | null,
-): value is NonNullable<TItemsQueryParams["condition"]> {
+): value is NonNullable<NonNullable<TItemsQueryParams>["condition"]> {
   return conditions.some((condition) => condition.value === value);
 }
 
@@ -56,7 +56,7 @@ export function Catalog() {
     isError: isItemTypesError,
   } = useItemTypes();
 
-  const query: TItemsQueryParams = {};
+  const query: NonNullable<TItemsQueryParams> = {};
   if (searchText) query.search = searchText;
   const exchangeFormat = searchParams.get("exchange_format");
   if (isExchangeFormat(exchangeFormat)) query.exchange_format = exchangeFormat;
@@ -73,7 +73,45 @@ export function Catalog() {
     query.radius = radius;
   }
 
-  const { data: items, isLoading, isError } = useItems(query);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const {
+    data: itemPages,
+    isLoading,
+    isError,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useInfiniteItems(query);
+  const items = itemPages?.pages.flatMap((page) => page.results) ?? [];
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (
+      !target ||
+      !hasNextPage ||
+      isFetchingNextPage ||
+      isFetchNextPageError
+    ) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError]);
+
+  function loadNextPage() {
+    void fetchNextPage();
+  }
 
   function updateParam(name: string, value: string) {
     const nextParams = new URLSearchParams(searchParams);
@@ -229,7 +267,7 @@ export function Catalog() {
               )}
               {!isLoading && !isError && (
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {items?.length ?? 0} вещей
+                  {itemPages?.pages[0]?.count ?? 0} вещей
                 </p>
               )}
             </div>
@@ -252,17 +290,46 @@ export function Catalog() {
           {!isLoading && isError && (
             <p className="text-destructive">Не удалось загрузить каталог</p>
           )}
-          {!isLoading && !isError && items?.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="text-muted-foreground">
               По выбранным фильтрам ничего не найдено
             </p>
           )}
-          {!isLoading && !isError && !!items?.length && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-              {items.map((item) => (
-                <ItemCard item={item} key={item.id} />
-              ))}
-            </div>
+          {!isLoading && !isError && items.length > 0 && (
+            <>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                {items.map((item) => (
+                  <ItemCard item={item} key={item.id} />
+                ))}
+              </div>
+              <div
+                ref={loadMoreRef}
+                className="mt-8 flex min-h-10 justify-center"
+                aria-live="polite"
+              >
+                {isFetchingNextPage ? (
+                  <p className="text-muted-foreground">Загружаем товары...</p>
+                ) : isFetchNextPageError ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={loadNextPage}
+                  >
+                    Не удалось загрузить. Повторить
+                  </Button>
+                ) : hasNextPage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={loadNextPage}
+                  >
+                    Загрузить ещё
+                  </Button>
+                ) : (
+                  <p className="text-muted-foreground">Это все товары</p>
+                )}
+              </div>
+            </>
           )}
         </main>
       </div>

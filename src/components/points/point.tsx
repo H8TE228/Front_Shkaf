@@ -37,7 +37,10 @@ function todayHours(point: TExchangePoint) {
   const openingHours =
     point.opening_hours?.[currentDay as keyof typeof point.opening_hours];
 
-  return openingHours?.map(({ from, to }) => `${from}–${to}`).join(", ") || "выходной";
+  return (
+    openingHours?.map(({ from, to }) => `${from}–${to}`).join(", ") ||
+    "выходной"
+  );
 }
 
 function yandexMapsHref(point: TExchangePoint) {
@@ -61,19 +64,16 @@ export function Point() {
   const navigate = useNavigate();
   const [favoritePrompt, setFavoritePrompt] = useState(false);
   const { data: user, isLoading: meLoading } = useMe();
-  const {
-    data: point,
-    isLoading,
-    isError,
-  } = useExchangePointById(id ?? "");
+  const { data: point, isLoading, isError } = useExchangePointById(id ?? "");
   const { data: bookmarks } = useBookmarks({ type: "point" });
+  const bookmarksData = bookmarks?.results;
   const { mutate: createBookmark, isPending: createPending } =
     useCreateExchangePointBookmark();
   const { mutate: deleteBookmark, isPending: deletePending } =
     useDeleteExchangePointBookmark();
 
   const bookmarkPending = createPending || deletePending;
-  const bookmarked = !!bookmarks?.some(
+  const bookmarked = !!bookmarksData?.some(
     (bookmark) => bookmark.point?.id === point?.id,
   );
 
@@ -119,12 +119,11 @@ export function Point() {
             Пункты приёма
           </Link>
           <ChevronRight />
-          {/* сделать по id  */}
           <Link
-            to="/points"
+            to={`/points/${id}`}
             className="hover:underline hover:underline-offset-4"
           >
-            Карточка пункта
+            Пункт {point?.title}
           </Link>
         </nav>
 
@@ -163,7 +162,9 @@ export function Point() {
                 onClick={onFavoriteClick}
                 className="h-11 rounded-xl px-4 font-medium"
               >
-                <Heart className={bookmarked ? "fill-current text-primary" : ""} />{" "}
+                <Heart
+                  className={bookmarked ? "text-primary fill-current" : ""}
+                />{" "}
                 В избранное
               </Button>
             </div>
@@ -240,7 +241,9 @@ function PointDetails({ point }: { point: TExchangePoint }) {
                 <Clock3 className="size-4 shrink-0" />
                 Часы работы
               </dt>
-              <dd className="mt-1 text-[15px] font-medium">{todayHours(point)}</dd>
+              <dd className="mt-1 text-[15px] font-medium">
+                {todayHours(point)}
+              </dd>
             </div>
             {(point.phone || point.email) && (
               <div>
@@ -394,7 +397,7 @@ function PointPreviewMapView({
       <maps.YMapDefaultSchemeLayer />
       <maps.YMapDefaultFeaturesLayer />
       <maps.YMapMarker coordinates={maps.reactify.useDefault(center)}>
-        <span className="bg-primary block size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card" />
+        <span className="bg-primary border-card block size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2" />
       </maps.YMapMarker>
     </maps.YMap>
   );

@@ -104,6 +104,7 @@ export function Item() {
   const { data: user, isLoading: meLoading } = useMe();
   const { data: item, isLoading, isError } = useItemById(id ?? "");
   const { data: bookmarks } = useBookmarks({ type: "item" });
+  const bookmarksData = bookmarks?.results;
   const { mutate: createBookmark, isPending: createPending } =
     useCreateItemBookmark();
   const { mutate: deleteBookmark, isPending: deletePending } =
@@ -112,7 +113,7 @@ export function Item() {
     useCreateConversation();
 
   const bookmarkPending = createPending || deletePending;
-  const bookmarked = !!bookmarks?.some(
+  const bookmarked = !!bookmarksData?.some(
     (bookmark) => bookmark.item?.id === item?.id,
   );
   const isOwner = !!user && user.id === item?.owner_id;
@@ -176,7 +177,12 @@ export function Item() {
           {ready && (
             <>
               <ChevronRight />
-              <span>{item.title}</span>
+              <Link
+                to={`/item/${id}`}
+                className="hover:underline hover:underline-offset-4"
+              >
+                {item.title}
+              </Link>
             </>
           )}
         </nav>
@@ -199,7 +205,9 @@ export function Item() {
                     <Repeat2 />
                     {exchangeFormatTitle[item.exchange_format]}
                   </span>
-                  {item.district && <span className="ml-3">{item.district}</span>}
+                  {item.district && (
+                    <span className="ml-3">{item.district}</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -260,9 +268,7 @@ function ItemDetails({
   const mapHref = yandexMapsHref(item);
   const published = formatDate(item.created_at);
   const specs = [
-    item.item_type_title
-      ? { label: "Тип", value: item.item_type_title }
-      : null,
+    item.item_type_title ? { label: "Тип", value: item.item_type_title } : null,
     { label: "Состояние", value: conditionTitle[item.condition] },
     item.size ? { label: "Размер", value: item.size } : null,
     item.district ? { label: "Район", value: item.district } : null,
@@ -320,7 +326,7 @@ function ItemDetails({
       <div className="grid content-start gap-5">
         <div className="border-border bg-card grid content-start justify-items-start gap-4 rounded-2xl border p-5">
           <span
-            className="text-primary flex w-fit items-center gap-2 text-[13px] font-semibold data-[paused=true]:text-foreground [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
+            className="text-primary data-[paused=true]:text-foreground flex w-fit items-center gap-2 text-[13px] font-semibold [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
             data-paused={paused}
           >
             <span />
@@ -341,7 +347,9 @@ function ItemDetails({
               <MapPin className="text-primary size-5 shrink-0" />
               <div>
                 <span className="text-muted-foreground text-sm">Район</span>
-                <p className="text-2xl leading-7 font-semibold">{item.district}</p>
+                <p className="text-2xl leading-7 font-semibold">
+                  {item.district}
+                </p>
               </div>
             </div>
           )}
@@ -471,7 +479,7 @@ function ItemGallery({
           onClick={onFavoriteClick}
           className="bg-card absolute top-3 right-3 rounded-xl"
         >
-          <Heart className={bookmarked ? "fill-current text-primary" : ""} />
+          <Heart className={bookmarked ? "text-primary fill-current" : ""} />
         </Button>
 
         {!!slides.length && (
@@ -495,7 +503,11 @@ function ItemGallery({
                 index === current ? "border-primary" : "opacity-60"
               }`}
             >
-              <img src={photo.image} alt="" className="size-full object-cover" />
+              <img
+                src={photo.image}
+                alt=""
+                className="size-full object-cover"
+              />
             </Button>
           ))}
         </div>

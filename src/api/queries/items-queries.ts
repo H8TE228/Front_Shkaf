@@ -1,9 +1,14 @@
-import type { TItem, TItemPhoto, TItemsQueryParams } from "@/types";
+import type {
+  TItem,
+  TItemPhoto,
+  TItemsQueryParams,
+  TPaginatedItemList,
+} from "@/types";
 import { api } from "../api";
 
 export const itemsQueries = {
   getItems: async (params?: TItemsQueryParams) => {
-    const res = await api.get<TItem[]>("/items", { params });
+    const res = await api.get<TPaginatedItemList>("/items", { params });
     return res.data;
   },
 

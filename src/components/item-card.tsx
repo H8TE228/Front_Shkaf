@@ -34,13 +34,14 @@ export function ItemCard({ item }: TItemCardProps) {
     { type: "item" },
     !!user,
   );
+  const bookmarksData = bookmarks?.results;
   const { mutate: createBookmark, isPending: isCreatingBookmark } =
     useCreateItemBookmark();
   const { mutate: deleteBookmark, isPending: isDeletingBookmark } =
     useDeleteItemBookmark();
 
   const photo = [...item.photos].sort((a, b) => a.position - b.position)[0];
-  const isBookmarked = bookmarks?.some(
+  const isBookmarked = bookmarksData?.some(
     (bookmark) => bookmark.item?.id === item.id,
   );
   const isBookmarkPending = isCreatingBookmark || isDeletingBookmark;
