@@ -119,7 +119,13 @@ export function Point() {
             Пункты приёма
           </Link>
           <ChevronRight />
-          <span>Карточка пункта</span>
+          {/* сделать по id  */}
+          <Link
+            to="/points"
+            className="hover:underline hover:underline-offset-4"
+          >
+            Карточка пункта
+          </Link>
         </nav>
 
         {isLoading && <span>Загрузка...</span>}
@@ -213,7 +219,7 @@ function PointDetails({ point }: { point: TExchangePoint }) {
 
         <div className="border-border bg-card grid content-start justify-items-start gap-4 rounded-2xl border p-5">
           <span
-            className="text-primary flex w-fit items-center gap-2 text-[13px] font-semibold data-[paused=true]:text-foreground [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
+            className="text-primary data-[paused=true]:text-foreground flex w-fit items-center gap-2 text-[13px] font-semibold [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
             data-paused={paused}
           >
             <span />

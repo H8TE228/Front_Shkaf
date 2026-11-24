@@ -125,7 +125,12 @@ export function Points() {
             Главная
           </Link>
           <ChevronRight />
-          <span>Пункты приёма</span>
+          <Link
+            to="/points"
+            className="hover:underline hover:underline-offset-4"
+          >
+            Пункты приёма
+          </Link>
         </nav>
 
         <div className="mb-6">
@@ -242,7 +247,7 @@ export function Points() {
                   </p>
                 )}
                 <span
-                  className="text-primary flex w-fit items-center gap-2 text-[13px] font-semibold data-[paused=true]:text-foreground [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
+                  className="text-primary data-[paused=true]:text-foreground flex w-fit items-center gap-2 text-[13px] font-semibold [&>span]:size-2 [&>span]:rounded-full [&>span]:bg-current data-[paused=true]:[&>span]:border-[1.5px] data-[paused=true]:[&>span]:border-current data-[paused=true]:[&>span]:bg-transparent"
                   data-paused={selected.status !== "active"}
                 >
                   <span />
