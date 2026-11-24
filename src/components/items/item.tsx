@@ -28,6 +28,7 @@ import {
   useMe,
 } from "@/hooks";
 import type { TItem, TItemPhoto } from "@/types";
+import { ItemOwnerActions } from "./edit-item-form";
 
 const exchangeFormatTitle = {
   free: "Бесплатно",
@@ -387,6 +388,7 @@ function ItemDetails({
               <MessageCircle /> Написать
             </Button>
           )}
+          {isOwner && <ItemOwnerActions item={item} />}
         </div>
 
         <div className="border-border bg-card flex items-start gap-3 rounded-2xl border p-5">

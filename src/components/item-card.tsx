@@ -25,14 +25,15 @@ const conditionTitle: Record<TItem["condition"], string> = {
 
 type TItemCardProps = {
   item: TItem;
+  preview?: boolean;
 };
 
-export function ItemCard({ item }: TItemCardProps) {
+export function ItemCard({ item, preview = false }: TItemCardProps) {
   const navigate = useNavigate();
   const { data: user, isLoading: isUserLoading } = useMe();
   const { data: bookmarks, isLoading: areBookmarksLoading } = useBookmarks(
     { type: "item" },
-    !!user,
+    !preview && !!user,
   );
   const bookmarksData = bookmarks?.results;
   const { mutate: createBookmark, isPending: isCreatingBookmark } =
@@ -48,8 +49,12 @@ export function ItemCard({ item }: TItemCardProps) {
 
   return (
     <Card
-      onClick={() => navigate(`/item/${item.id}`)}
-      className="min-w-0 cursor-pointer gap-3 overflow-visible bg-transparent p-2 shadow-none ring-0 transition-all hover:-translate-y-1 hover:shadow"
+      onClick={preview ? undefined : () => navigate(`/item/${item.id}`)}
+      className={`min-w-0 gap-3 overflow-visible bg-transparent p-2 shadow-none ring-0 ${
+        preview
+          ? "cursor-default"
+          : "cursor-pointer transition-all hover:-translate-y-1 hover:shadow"
+      }`}
     >
       <div className="border-border bg-muted relative aspect-square overflow-hidden rounded-[14px] border">
         {photo ? (
@@ -72,37 +77,40 @@ export function ItemCard({ item }: TItemCardProps) {
         >
           {exchangeFormatTitle[item.exchange_format]}
         </Badge>
-        <Button
-          onClick={(e: React.MouseEvent) => {
-            e.stopPropagation();
-            if (isUserLoading || isBookmarkPending || areBookmarksLoading) {
-              return;
-            }
+        {!preview && (
+          <Button
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              if (isUserLoading || isBookmarkPending || areBookmarksLoading) {
+                return;
+              }
 
-            if (!user) {
-              navigate("/login");
-              return;
-            }
+              if (!user) {
+                navigate("/login");
+                return;
+              }
 
-            if (isBookmarked) {
-              deleteBookmark(String(item.id));
-            } else {
-              createBookmark(String(item.id));
-            }
-          }}
-          type="button"
-          variant="ghost"
-          size="icon"
-          disabled={isUserLoading || isBookmarkPending || areBookmarksLoading}
-
-          className="text-foreground absolute top-2 right-2 rounded-none"
-        >
-          <Heart
-            className={`size-6 stroke-2 ${
-              isBookmarked ? "fill-destructive text-destructive" : "fill-white"
-            }`}
-          />
-        </Button>
+              if (isBookmarked) {
+                deleteBookmark(String(item.id));
+              } else {
+                createBookmark(String(item.id));
+              }
+            }}
+            type="button"
+            variant="ghost"
+            size="icon"
+            disabled={isUserLoading || isBookmarkPending || areBookmarksLoading}
+            className="text-foreground absolute top-2 right-2 rounded-none"
+          >
+            <Heart
+              className={`size-6 stroke-2 ${
+                isBookmarked
+                  ? "fill-destructive text-destructive"
+                  : "fill-white"
+              }`}
+            />
+          </Button>
+        )}
       </div>
       <CardContent className="flex min-w-0 flex-col items-start p-0">
         <h2 className="line-clamp-2 text-base leading-5 font-bold sm:text-lg">
@@ -111,6 +119,11 @@ export function ItemCard({ item }: TItemCardProps) {
         <p className="mt-1 line-clamp-1 text-sm leading-5 font-medium">
           {item.size || conditionTitle[item.condition]}
         </p>
+        {item.description && (
+          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm leading-5">
+            {item.description}
+          </p>
+        )}
         <p className="text-muted-foreground mt-2 text-xs leading-4">
           {item.district}
         </p>

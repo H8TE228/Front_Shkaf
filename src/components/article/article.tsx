@@ -13,7 +13,7 @@ export function Article() {
       : articles.filter((article) => article.topic === selectedTopic);
 
   return (
-    <section className="mx-auto w-full max-w-[1550px] px-6 pt-8 lg:px-0 lg:pt-12">
+    <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
       <nav className="text-muted-foreground mb-5 flex items-center gap-2 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
         <Link to="/" className="hover:text-foreground">
           Главная

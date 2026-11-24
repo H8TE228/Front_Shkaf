@@ -1,8 +1,9 @@
-import { Map, Newspaper, PackageSearch, UserRound } from "lucide-react";
+import { Map, Newspaper, PackageSearch, Plus, UserRound } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { LocationButton } from "../location-button";
 import { useMe } from "@/hooks";
 import { InputSearch } from "../input-search";
+import { Button } from "../ui/button";
 
 export function Header() {
   const navigate = useNavigate();
@@ -23,6 +24,17 @@ export function Header() {
         <div className="hidden flex-1 md:block">
           <InputSearch variant="header" />
         </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="bg-background! ml-auto h-10 gap-2 rounded-xl px-3 md:ml-0"
+          onClick={() => navigate("/items/new")}
+        >
+          <Plus />
+          <span className="hidden lg:inline">Разместить вещь</span>
+        </Button>
 
         <nav className="ml-auto hidden shrink-0 items-center gap-1 sm:gap-3 md:flex">
           <button
