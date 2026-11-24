@@ -500,6 +500,12 @@ function ChatPanes({
                 maxLength={1500}
                 value={draft}
                 onChange={(event) => onDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" || event.shiftKey) return;
+                  event.preventDefault();
+                  if (!draft.trim() || isSending) return;
+                  onSubmit();
+                }}
                 className="border-border bg-card focus-visible:border-ring focus-visible:ring-ring/30 max-h-[120px] min-h-11 flex-1 resize-none rounded-2xl border px-3.5 py-2.5 leading-[22px] outline-none focus-visible:ring-3"
               />
               <Button

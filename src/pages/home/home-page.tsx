@@ -1,5 +1,4 @@
-import { Recomendations } from "@/components";
-// import { CollectionPoints } from "@/components/home/collection-points";
+import { CollectionPoints, Recomendations } from "@/components";
 import { Hero } from "@/components/home/hero";
 
 export function HomePage() {
@@ -7,7 +6,7 @@ export function HomePage() {
     <>
       <Hero />
       <Recomendations />
-      {/* <CollectionPoints /> */}
+      <CollectionPoints />
     </>
   );
 }
