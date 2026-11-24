@@ -13,6 +13,7 @@ import {
   FavoritesPage,
   ChatsPage,
   PointPage,
+  MyItemsPage,
 } from "@/pages";
 import { useMe } from "./hooks";
 
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
             Component: FavoritesPage,
           },
           { path: "/chats", Component: ChatsPage },
+          { path: "/my-items", Component: MyItemsPage },
         ],
       },
     ],

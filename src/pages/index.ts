@@ -10,3 +10,4 @@ export * from "./points/points-page.tsx";
 export * from "./favorites/favorites-page.tsx";
 export * from "./chats/chats-page";
 export * from "./point/point-page";
+export * from "./my-items/my-items-page";

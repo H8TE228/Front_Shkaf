@@ -12,3 +12,4 @@ export * from "./mobile-search-dialog";
 export * from "./points";
 export * from "./favorites";
 export * from "./chats";
+export * from "./my-items";
