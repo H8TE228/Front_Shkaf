@@ -38,6 +38,7 @@ import {
   useUsers,
 } from "@/hooks";
 import type { TItem, TItemPhoto, TUser } from "@/types";
+import { ItemOwnerActions } from "./edit-item-form";
 
 const exchangeFormatTitle = {
   free: "Бесплатно",
@@ -129,6 +130,7 @@ export function Item() {
   const { data: items } = useItems();
   const { data: users, isError: usersError } = useUsers();
   const { data: bookmarks } = useBookmarks({ type: "item" });
+  const bookmarksData = bookmarks?.results;
   const { mutate: createBookmark, isPending: createPending } =
     useCreateItemBookmark();
   const { mutate: deleteBookmark, isPending: deletePending } =
@@ -137,7 +139,7 @@ export function Item() {
     useCreateConversation();
 
   const bookmarkPending = createPending || deletePending;
-  const bookmarked = !!bookmarks?.some(
+  const bookmarked = !!bookmarksData?.some(
     (bookmark) => bookmark.item?.id === item?.id,
   );
   const isOwner = !!user && user.id === item?.owner_id;
@@ -229,7 +231,12 @@ export function Item() {
           {ready && (
             <>
               <ChevronRight />
-              <span>{item.title}</span>
+              <Link
+                to={`/item/${id}`}
+                className="hover:underline hover:underline-offset-4"
+              >
+                {item.title}
+              </Link>
             </>
           )}
         </nav>
@@ -441,6 +448,8 @@ function ItemDetails({
               <MessageCircle className="size-5" /> Написать владельцу
             </Button>
           )}
+          {isOwner && <ItemOwnerActions item={item} />}
+        </div>
 
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -562,8 +571,12 @@ function ItemGallery({
                 index === current ? "border-primary" : "border-border opacity-60"
               }`}
             >
-              <img src={photo.image} alt="" className="size-full object-cover" />
-            </button>
+              <img
+                src={photo.image}
+                alt=""
+                className="size-full object-cover"
+              />
+            </Button>
           ))}
         </div>
       )}

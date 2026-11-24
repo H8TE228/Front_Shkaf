@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 export function useUpdateItem() {
-  return useMutation<TItem, AxiosError, { id: string; itemData: unknown }>({
+  return useMutation<TItem, AxiosError, { id: string; itemData: FormData }>({
     mutationFn: ({ id, itemData }) => itemsQueries.updateItem(id, itemData),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["items"] });

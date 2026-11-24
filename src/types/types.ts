@@ -24,6 +24,7 @@ export type TRegisterResponse = Pick<
 export type TPatchPassword = components["schemas"]["ChangePassword"];
 
 export type TItem = components["schemas"]["Item"];
+export type TPaginatedItemList = components["schemas"]["PaginatedItemList"];
 export type TItemsQueryParams = operations["items_list"]["parameters"]["query"];
 export type TItemCreateRequest = Pick<
   components["schemas"]["Item"],
@@ -61,11 +62,7 @@ export type TExchangePointUpdateRequest = Partial<TExchangePointCreateRequest>;
 export type TExchangePointsQueryParams =
   operations["exchangePoints_list"]["parameters"]["query"];
 
-export type TBookmarkItem = TItem & {
-  latitude: number | null;
-  longitude: number | null;
-  distance: number | null;
-};
+export type TBookmarkItem = components["schemas"]["PaginatedBookmarkList"];
 
 export type TBookmarkExchangePoint = TExchangePoint & {
   distance: number | null;
@@ -130,4 +127,41 @@ export type TConversationMessageCreateRequest = {
 
 export type TConversationReadResponse = {
   marked_read: number;
+};
+
+export type TPatchedUser = Pick<
+  components["schemas"]["PatchedUser"],
+  | "username"
+  | "first_name"
+  | "last_name"
+  | "phone_number"
+  | "city"
+  | "district"
+  | "avatar"
+  | "email"
+>;
+
+export type TNotification = components["schemas"]["Notification"];
+export type TNotificationType = components["schemas"]["TypeEnum"];
+
+export type TExchange = components["schemas"]["Exchange"];
+export type TExchangeStatus = components["schemas"]["ExchangeStatusEnum"];
+
+export type TReview = components["schemas"]["Review"];
+export type TReviewCreateRequest = {
+  exchange_id: number;
+  rating: number;
+  comment?: string;
+};
+export type TReviewsQueryParams = {
+  author?: number;
+  rating?: number;
+  target_user?: number;
+};
+
+export type TRating = components["schemas"]["Rating"];
+
+export type TSubscription = components["schemas"]["Subscription"];
+export type TSubscriptionCreateRequest = {
+  item_type?: number | null;
 };

@@ -62,6 +62,7 @@ export function InputSearch({
     isLoading,
     isError,
   } = useItems(debouncedSearch ? { search: debouncedSearch } : undefined);
+  const itemsData = items?.results;
 
   useEffect(() => {
     if (focusOnOpen) {
@@ -87,7 +88,7 @@ export function InputSearch({
     if (variant === "dialog" && resultsRef.current) {
       resultsRef.current.scrollTop = resultsRef.current.scrollHeight;
     }
-  }, [items, variant]);
+  }, [itemsData, variant]);
 
   function onSubmit({ search: value }: FormValues) {
     const nextSearch = value.trim();
@@ -229,7 +230,7 @@ export function InputSearch({
             {!isSearchPending &&
               !isLoading &&
               !isError &&
-              items?.length === 0 && (
+              itemsData?.length === 0 && (
                 <p className="text-muted-foreground px-3 py-2 text-sm">
                   Ничего не найдено
                 </p>
@@ -237,7 +238,7 @@ export function InputSearch({
             {!isSearchPending &&
               !isLoading &&
               !isError &&
-              items?.toReversed().map((item) => (
+              itemsData?.toReversed().map((item) => (
                 <Link
                   key={item.id}
                   to={`/item/${item.id}`}

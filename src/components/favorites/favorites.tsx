@@ -10,11 +10,7 @@ import {
   useDeleteItemBookmark,
 } from "@/hooks";
 import { getCurrentDay } from "@/lib";
-import type {
-  TBookmarkExchangePoint,
-  TBookmarkItem,
-  TBookmarkType,
-} from "@/types";
+import type { TBookmarkExchangePoint, TBookmarkType, TItem } from "@/types";
 
 const exchangeFormatTitle = {
   free: "Бесплатно",
@@ -31,7 +27,11 @@ const pointFormatTitle = {
 function Cover({ src }: { src?: string | null }) {
   if (src) {
     return (
-      <img src={src} alt="" className="size-14 shrink-0 rounded-xl object-cover" />
+      <img
+        src={src}
+        alt=""
+        className="size-14 shrink-0 rounded-xl object-cover"
+      />
     );
   }
 
@@ -47,10 +47,13 @@ function todayHours(point: TBookmarkExchangePoint) {
   const openingHours =
     point.opening_hours?.[currentDay as keyof typeof point.opening_hours];
 
-  return openingHours?.map(({ from, to }) => `${from}–${to}`).join(", ") || "выходной";
+  return (
+    openingHours?.map(({ from, to }) => `${from}–${to}`).join(", ") ||
+    "выходной"
+  );
 }
 
-export function Favorites() {
+export function Favorites({ embedded = false }: { embedded?: boolean }) {
   const [tab, setTab] = useState<TBookmarkType>("item");
   const [undo, setUndo] = useState<{ kind: TBookmarkType; id: string } | null>(
     null,
@@ -61,11 +64,13 @@ export function Favorites() {
     isLoading: itemsLoading,
     isError: itemsError,
   } = useBookmarks({ type: "item" });
+  const itemBookmarksData = itemBookmarks?.results;
   const {
     data: pointBookmarks,
     isLoading: pointsLoading,
     isError: pointsError,
   } = useBookmarks({ type: "point" });
+  const pointBookmarksData = pointBookmarks?.results;
   const { mutate: deleteItemBookmark } = useDeleteItemBookmark();
   const { mutate: deletePointBookmark } = useDeleteExchangePointBookmark();
   const { mutate: createItemBookmark } = useCreateItemBookmark();
@@ -74,7 +79,7 @@ export function Favorites() {
   const isItems = tab === "item";
   const isLoading = isItems ? itemsLoading : pointsLoading;
   const isError = isItems ? itemsError : pointsError;
-  const bookmarks = isItems ? itemBookmarks : pointBookmarks;
+  const bookmarks = isItems ? itemBookmarksData : pointBookmarksData;
 
   useEffect(() => {
     if (!undo) return;
@@ -95,7 +100,8 @@ export function Favorites() {
   function restore() {
     if (!undo) return;
     setPendingId(`${undo.kind}:${undo.id}`);
-    const mutate = undo.kind === "item" ? createItemBookmark : createPointBookmark;
+    const mutate =
+      undo.kind === "item" ? createItemBookmark : createPointBookmark;
     mutate(undo.id, {
       onSuccess: () => setUndo(null),
       onSettled: () => setPendingId(null),
@@ -103,26 +109,34 @@ export function Favorites() {
   }
 
   const tabs: [TBookmarkType, string, number][] = [
-    ["item", "Вещи", itemBookmarks?.length ?? 0],
-    ["point", "Пункты приёма", pointBookmarks?.length ?? 0],
+    ["item", "Вещи", itemBookmarksData?.length ?? 0],
+    ["point", "Пункты приёма", pointBookmarksData?.length ?? 0],
   ];
 
   return (
     <div>
-      <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
-        <nav className="text-muted-foreground mb-5 flex items-center gap-2 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
-          <Link to="/" className="hover:underline hover:underline-offset-4">
-            Главная
-          </Link>
-          <ChevronRight />
-          <span>Избранное</span>
-        </nav>
-        <h1 className="mb-6 text-[32px] leading-10 font-semibold tracking-tight">
-          Избранное
-        </h1>
-      </section>
+      {!embedded && (
+        <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
+          <nav className="text-muted-foreground mb-5 flex items-center gap-2 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
+            <Link to="/" className="hover:underline hover:underline-offset-4">
+              Главная
+            </Link>
+            <ChevronRight />
+            <span>Избранное</span>
+          </nav>
+          <h1 className="mb-6 text-[32px] leading-10 font-semibold tracking-tight">
+            Избранное
+          </h1>
+        </section>
+      )}
 
-      <section className="mx-auto w-full max-w-[1550px] px-6 pb-12 lg:px-0">
+      <section
+        className={
+          embedded
+            ? undefined
+            : "mx-auto w-full max-w-[1550px] px-6 pb-12 lg:px-0"
+        }
+      >
         <div className="mb-3 flex gap-1.5" role="group" aria-label="Разделы избранного">
           {tabs.map(([id, label, count]) => (
             <button
@@ -170,12 +184,14 @@ export function Favorites() {
 
         {!isLoading && !isError && !!bookmarks?.length && (
           <section
-            aria-label={isItems ? "Сохранённые вещи" : "Сохранённые пункты приёма"}
+            aria-label={
+              isItems ? "Сохранённые вещи" : "Сохранённые пункты приёма"
+            }
             className="border-border bg-card overflow-hidden rounded-2xl border"
           >
             <ul className="divide-border divide-y">
               {isItems
-                ? itemBookmarks?.map((bookmark) =>
+                ? itemBookmarksData?.map((bookmark) =>
                     bookmark.item ? (
                       <ItemRow
                         key={bookmark.id}
@@ -185,7 +201,7 @@ export function Favorites() {
                       />
                     ) : null,
                   )
-                : pointBookmarks?.map((bookmark) =>
+                : pointBookmarksData?.map((bookmark) =>
                     bookmark.point ? (
                       <PointRow
                         key={bookmark.id}
@@ -225,7 +241,7 @@ function ItemRow({
   pending,
   onRemove,
 }: {
-  item: TBookmarkItem;
+  item: TItem;
   pending: boolean;
   onRemove: () => void;
 }) {
@@ -259,11 +275,7 @@ function ItemRow({
             {exchangeFormatTitle[item.exchange_format]}
           </span>
         )}
-        <RemoveButton
-          name={item.title}
-          pending={pending}
-          onRemove={onRemove}
-        />
+        <RemoveButton name={item.title} pending={pending} onRemove={onRemove} />
       </div>
     </li>
   );
@@ -279,7 +291,9 @@ function PointRow({
   onRemove: () => void;
 }) {
   const paused = point.status === "closed";
-  const formats = point.formats?.map((format) => pointFormatTitle[format]).join(", ");
+  const formats = point.formats
+    ?.map((format) => pointFormatTitle[format])
+    .join(", ");
   const accepts = point.item_types.map((type) => type.title).join(", ");
   const address = [
     point.address.city,
@@ -314,11 +328,19 @@ function PointRow({
               Приём приостановлен
             </span>
           )}
-          <span className={paused ? "text-muted-foreground text-[13px]" : "font-medium"}>
+          <span
+            className={
+              paused ? "text-muted-foreground text-[13px]" : "font-medium"
+            }
+          >
             {todayHours(point)}
           </span>
         </div>
-        <RemoveButton name={point.title} pending={pending} onRemove={onRemove} />
+        <RemoveButton
+          name={point.title}
+          pending={pending}
+          onRemove={onRemove}
+        />
       </div>
     </li>
   );

@@ -620,7 +620,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["users_retrieve"];
         put?: never;
         post?: never;
         delete: operations["users_destroy"];
@@ -985,6 +985,111 @@ export interface components {
             from: string;
             to: string;
         };
+        PaginatedBookmarkList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Bookmark"][];
+        };
+        PaginatedConversationList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Conversation"][];
+        };
+        PaginatedExchangeList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Exchange"][];
+        };
+        PaginatedItemList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Item"][];
+        };
+        PaginatedNotificationList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Notification"][];
+        };
+        PaginatedReviewList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Review"][];
+        };
+        PaginatedUserList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["User"][];
+        };
         Participant: {
             readonly id: number;
             /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
@@ -1127,6 +1232,26 @@ export interface components {
              */
             readonly updated_at?: string;
         };
+        PublicUser: {
+            readonly id: number;
+            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
+            readonly username: string;
+            readonly first_name: string;
+            /** Format: uri */
+            readonly avatar: string | null;
+            readonly city: string;
+            /**
+             * Creation date
+             * Format: date-time
+             */
+            readonly created_at: string;
+            readonly rating: components["schemas"]["PublicUserRating"];
+        };
+        PublicUserRating: {
+            /** Format: double */
+            average: number | null;
+            count: number;
+        };
         Rating: {
             user_id: number;
             /**
@@ -1246,7 +1371,12 @@ export type $defs = Record<string, never>;
 export interface operations {
     conversations_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1258,7 +1388,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Conversation"][];
+                    "application/json": components["schemas"]["PaginatedConversationList"];
                 };
             };
         };
@@ -1551,6 +1681,10 @@ export interface operations {
     exchanges_list: {
         parameters: {
             query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
                 /**
                  * @description giver — я отдаю, receiver — я получаю
                  *
@@ -1578,7 +1712,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Exchange"][];
+                    "application/json": components["schemas"]["PaginatedExchangeList"];
                 };
             };
         };
@@ -1752,6 +1886,11 @@ export interface operations {
                 lng?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                owner_id?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
                 /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
                 radius?: number;
                 /** @description A search term. */
@@ -1776,7 +1915,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Item"][];
+                    "application/json": components["schemas"]["PaginatedItemList"];
                 };
             };
         };
@@ -1808,7 +1947,12 @@ export interface operations {
     };
     items_exchanges_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
             header?: never;
             path: {
                 item_id: number;
@@ -1822,7 +1966,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Exchange"][];
+                    "application/json": components["schemas"]["PaginatedExchangeList"];
                 };
             };
         };
@@ -2103,6 +2247,10 @@ export interface operations {
     me_bookmarks_list: {
         parameters: {
             query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
                 /**
                  * @description * `item` - item
                  *     * `point` - point
@@ -2120,7 +2268,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Bookmark"][];
+                    "application/json": components["schemas"]["PaginatedBookmarkList"];
                 };
             };
         };
@@ -2199,6 +2347,11 @@ export interface operations {
                 lng?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                owner_id?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
                 /** @description Поиск рядом: широта и долгота центра, радиус в км (по умолчанию 5, максимум 50). */
                 radius?: number;
                 /** @description A search term. */
@@ -2223,14 +2376,19 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Item"][];
+                    "application/json": components["schemas"]["PaginatedItemList"];
                 };
             };
         };
     };
     me_notifications_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2242,7 +2400,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Notification"][];
+                    "application/json": components["schemas"]["PaginatedNotificationList"];
                 };
             };
         };
@@ -2423,6 +2581,10 @@ export interface operations {
             query?: {
                 /** @description Отзывы, написанные пользователем */
                 author?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
                 rating?: number;
                 /** @description Отзывы о пользователе */
                 target_user?: number;
@@ -2438,7 +2600,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Review"][];
+                    "application/json": components["schemas"]["PaginatedReviewList"];
                 };
             };
         };
@@ -2571,7 +2733,12 @@ export interface operations {
     };
     users_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2583,7 +2750,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"][];
+                    "application/json": components["schemas"]["PaginatedUserList"];
+                };
+            };
+        };
+    };
+    users_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicUser"];
                 };
             };
         };

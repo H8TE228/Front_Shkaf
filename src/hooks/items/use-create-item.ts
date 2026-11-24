@@ -1,11 +1,11 @@
 import { itemsQueries } from "@/api";
 import { queryClient } from "@/lib";
-import type { TItem, TItemCreateRequest } from "@/types";
+import type { TItem } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 export function useCreateItem() {
-  return useMutation<TItem, AxiosError, TItemCreateRequest>({
+  return useMutation<TItem, AxiosError, FormData>({
     mutationFn: itemsQueries.createItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });

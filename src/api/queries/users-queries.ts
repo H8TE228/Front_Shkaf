@@ -1,9 +1,14 @@
-import type { TUser } from "@/types";
+import type { TRating, TUser } from "@/types";
 import { api } from "..";
 
 export const usersQueries = {
   getUsers: async () => {
     const res = await api.get<TUser[]>("/users");
+    return res.data;
+  },
+
+  getUserRating: async (id: string) => {
+    const res = await api.get<TRating>(`/users/${id}/rating`);
     return res.data;
   },
 

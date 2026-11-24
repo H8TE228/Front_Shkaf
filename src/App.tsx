@@ -13,6 +13,11 @@ import {
   FavoritesPage,
   ChatsPage,
   PointPage,
+  UserProfilePage,
+  ExchangeReviewPage,
+  MyItemsPage,
+  ArticleDetailPage,
+  CreateItemPage,
 } from "@/pages";
 import { useMe } from "./hooks";
 
@@ -24,8 +29,10 @@ const router = createBrowserRouter([
       { path: "/catalog", Component: CatalogPage },
       { path: "/item/:id", Component: ItemPage },
       { path: "/articles", Component: ArticlesPage },
+      { path: "/articles/:slug", Component: ArticleDetailPage },
       { path: "/points", Component: PointsPage },
       { path: "/points/:id", Component: PointPage },
+      { path: "/users/:id", Component: UserProfilePage },
       { path: "*", Component: ErrorPage },
 
       {
@@ -48,6 +55,12 @@ const router = createBrowserRouter([
             Component: FavoritesPage,
           },
           { path: "/chats", Component: ChatsPage },
+          { path: "/my-items", Component: MyItemsPage },
+          {
+            path: "/users/:id/review/:exchangeId",
+            Component: ExchangeReviewPage,
+          },
+          { path: "/items/new", Component: CreateItemPage },
         ],
       },
     ],

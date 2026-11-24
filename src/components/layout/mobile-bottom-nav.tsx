@@ -21,7 +21,7 @@ export function MobileBottomNav() {
     <nav className="bg-bottom-nav-background fixed inset-x-0 bottom-0 z-40 grid h-26 grid-cols-5 items-center justify-items-center rounded-t-4xl border-t px-2 backdrop-blur md:hidden">
       <button
         onClick={() => navigate("/")}
-        className={`flex size-18 cursor-pointer items-center justify-center rounded-2xl transition-colors ${
+        className={`flex size-14 cursor-pointer items-center justify-center rounded-2xl transition-colors xs:size-18 ${
           isActive("/")
             ? "bg-secondary text-primary"
             : "text-foreground hover:bg-muted"
@@ -32,7 +32,7 @@ export function MobileBottomNav() {
 
       <button
         onClick={() => navigate("/points")}
-        className={`flex size-18 cursor-pointer items-center justify-center rounded-2xl transition-colors ${
+        className={`flex size-14 cursor-pointer items-center justify-center rounded-2xl transition-colors xs:size-18 ${
           isActive("/points")
             ? "bg-secondary text-primary"
             : "text-foreground hover:bg-muted"
@@ -44,14 +44,14 @@ export function MobileBottomNav() {
       <button
         type="button"
         onClick={openMobileSearchModal}
-        className="text-primary hover:bg-muted flex size-23 cursor-pointer items-center justify-center rounded-2xl transition-colors"
+        className="text-primary hover:bg-muted flex size-16 cursor-pointer items-center justify-center rounded-2xl transition-colors xs:size-23"
       >
         <Search className="size-9" />
       </button>
 
       <button
         onClick={() => navigate("/catalog")}
-        className={`flex size-18 cursor-pointer items-center justify-center rounded-2xl transition-colors ${
+        className={`flex size-14 cursor-pointer items-center justify-center rounded-2xl transition-colors xs:size-18 ${
           isActive("/catalog") || isActive("/item")
             ? "bg-secondary text-primary"
             : "text-foreground hover:bg-muted"
@@ -62,7 +62,7 @@ export function MobileBottomNav() {
 
       <button
         onClick={() => navigate(isAuth ? "/profile" : "/login")}
-        className={`flex size-18 cursor-pointer items-center justify-center rounded-2xl transition-colors ${
+        className={`flex size-14 cursor-pointer items-center justify-center rounded-2xl transition-colors xs:size-18 ${
           profileIsActive
             ? "bg-secondary text-primary"
             : "text-foreground hover:bg-muted"

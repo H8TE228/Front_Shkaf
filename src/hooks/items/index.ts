@@ -1,4 +1,5 @@
 export * from "./use-create-item";
+export * from "./use-infinite-items";
 export * from "./use-items";
 export * from "./use-create-item-photo";
 export * from "./use-delete-item";
