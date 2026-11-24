@@ -6,3 +6,4 @@ export * from "./me-queries";
 export * from "./exchange-points-queries";
 export * from "./bookmarks-queries";
 export * from "./conversations-queries";
+export * from "./exchanges-queries";
