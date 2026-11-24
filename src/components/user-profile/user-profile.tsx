@@ -13,10 +13,10 @@ export function UserProfile({ id }: { id: string }) {
   const rating = useUserRating(id);
   const reviews = useReviews({ target_user: Number(id) });
   const items = useItems();
-  const user = users.data?.find((entry) => String(entry.id) === id);
+  const user = users.data?.results.find((entry) => String(entry.id) === id);
   const name = user ? personName(user) : "";
   const title = name ? `Профиль ${name}` : "Профиль";
-  const ownItems = (items.data ?? []).filter(
+  const ownItems = (items.data?.results ?? []).filter(
     (item) => String(item.owner_id) === id,
   );
   const reviewCount = reviews.data?.length ?? rating.data?.count ?? 0;

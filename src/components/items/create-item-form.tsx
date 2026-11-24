@@ -199,7 +199,7 @@ export function CreateItemForm() {
         <ChevronRight className="sm:hidden" />
         <div className="hidden items-center gap-2 sm:flex">
           <ChevronRight />
-          <Link to="/profile" className="hover:text-foreground">
+          <Link to="/my-items" className="hover:text-foreground">
             Мои вещи
           </Link>
           <ChevronRight />
@@ -243,7 +243,7 @@ export function CreateItemForm() {
                         <p className="text-sm">
                           Покажите вещь целиком и крупным планом. До 10 фото.
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           Выбрано: {field.value.length} из 10
                         </p>
                         <input
@@ -354,7 +354,10 @@ export function CreateItemForm() {
                       </ul>
                     )}
                     {photoLimitMessage && (
-                      <p role="status" className="text-sm text-muted-foreground">
+                      <p
+                        role="status"
+                        className="text-muted-foreground text-sm"
+                      >
                         {photoLimitMessage}
                       </p>
                     )}

@@ -15,11 +15,14 @@ export function Article() {
   return (
     <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
       <nav className="text-muted-foreground mb-5 flex items-center gap-2 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
-        <Link to="/" className="hover:text-foreground">
+        <Link to="/" className="hover:underline hover:underline-offset-4">
           Главная
         </Link>
         <ChevronRight />
-        <Link to="/articles" className="hover:text-foreground">
+        <Link
+          to="/articles"
+          className="hover:underline hover:underline-offset-4"
+        >
           Статьи и инструкции
         </Link>
       </nav>

@@ -6,8 +6,8 @@ import { MediaCover } from "./media-cover";
 
 export function ProfileHistory() {
   const { data: user } = useMe();
-  const { data, isLoading, isError } = useExchanges();
-  const exchanges = [...(data ?? [])].sort(
+  const { data: exchangePage, isLoading, isError } = useExchanges();
+  const exchanges = [...(exchangePage?.results ?? [])].sort(
     (a, b) =>
       new Date(exchangeMoment(b)).getTime() -
       new Date(exchangeMoment(a)).getTime(),

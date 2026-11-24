@@ -1,9 +1,21 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Camera, Check, ChevronRight, EyeOff, MapPin, Pencil, Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Camera,
+  Check,
+  ChevronRight,
+  EyeOff,
+  MapPin,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { Button } from "../ui/button";
-import { useMyItems } from "@/hooks";
+import { DeleteItemDialog, EditItemDialog } from "../items/edit-item-form";
+import { useMyItems, useUpdateItem } from "@/hooks";
 import type { TItem } from "@/types";
+import { isAxiosError } from "axios";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 
 type ItemFilter = "all" | "active" | "hidden" | "given";
 
@@ -30,15 +42,32 @@ function statusView(status?: TItem["status"]) {
     return { label: "Передано", icon: Check, className: "text-foreground" };
   }
   if (itemGroup(status) === "hidden") {
-    return { label: "Скрыто", icon: EyeOff, className: "text-muted-foreground" };
+    return {
+      label: "Скрыто",
+      icon: EyeOff,
+      className: "text-muted-foreground",
+    };
   }
   return { label: "Опубликовано", icon: null, className: "text-primary" };
 }
 
+function getErrorMessage(
+  error: unknown,
+  fallback = "Не удалось сохранить изменения. Попробуйте ещё раз.",
+) {
+  if (isAxiosError(error)) {
+    const detail = error.response?.data?.detail;
+    if (typeof detail === "string") return detail;
+  }
+
+  return fallback;
+}
+
 export function MyItems() {
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useMyItems();
   const [filter, setFilter] = useState<ItemFilter>("all");
-  const items = data ?? [];
+  const items = data?.results ?? [];
   const counts = {
     all: items.length,
     active: items.filter((item) => itemGroup(item.status) === "active").length,
@@ -64,20 +93,33 @@ export function MyItems() {
             Главная
           </Link>
           <ChevronRight />
-          <span>Мои вещи</span>
+          <Link
+            to="/my-items"
+            className="hover:underline hover:underline-offset-4"
+          >
+            Мои вещи
+          </Link>
         </nav>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-[32px] leading-10 font-semibold tracking-tight">
             Мои вещи
           </h1>
-          <Button type="button" className="h-12 rounded-xl px-5 font-semibold">
+          <Button
+            onClick={() => navigate("/items/new")}
+            type="button"
+            className="h-10 rounded-xl px-5 font-semibold"
+          >
             <Plus /> Разместить вещь
           </Button>
         </div>
       </section>
 
       <section className="mx-auto w-full max-w-[1550px] px-6 pb-12 lg:px-0">
-        <div className="mb-5 flex flex-wrap gap-1.5" role="group" aria-label="Статус вещей">
+        <div
+          className="mb-5 flex flex-wrap gap-1.5"
+          role="group"
+          aria-label="Статус вещей"
+        >
           {tabs.map(([id, label, count]) => (
             <button
               key={id}
@@ -116,64 +158,132 @@ export function MyItems() {
 }
 
 function ItemCard({ item }: { item: TItem }) {
-  const photo = [...(item.photos ?? [])].sort((a, b) => a.position - b.position)[0];
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const photo = [...(item.photos ?? [])].sort(
+    (a, b) => a.position - b.position,
+  )[0];
   const status = statusView(item.status);
   const StatusIcon = status.icon;
   const size = item.size?.trim();
   const detail = size || conditionTitle[item.condition];
   const district = item.district?.trim();
   const given = itemGroup(item.status) === "given";
+  const updateItem = useUpdateItem();
+  const [activationError, setActivationError] = useState<string | null>(null);
+
+  function activateItem(id: string) {
+    setActivationError(null);
+    const itemData = new FormData();
+    itemData.append("status", "active");
+
+    updateItem.mutate(
+      { id, itemData },
+      {
+        onError: (error) => {
+          setActivationError(getErrorMessage(error));
+        },
+      },
+    );
+  }
 
   return (
-    <li className="border-border bg-card flex h-full flex-col overflow-hidden rounded-2xl border">
-      <div className="bg-muted text-muted-foreground grid aspect-square place-items-center">
-        {photo?.image ? (
-          <img src={photo.image} alt="" className="size-full object-cover" />
-        ) : (
-          <Camera className="size-11" />
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-4">
-        <span className={`flex items-center gap-2 text-sm font-semibold ${status.className}`}>
-          {StatusIcon ? (
-            <StatusIcon className="size-4" />
+    <>
+      <li className="border-border bg-card flex h-full flex-col overflow-hidden rounded-2xl border">
+        <div className="bg-muted text-muted-foreground grid aspect-square place-items-center">
+          {photo?.image ? (
+            <img src={photo.image} alt="" className="size-full object-cover" />
           ) : (
-            <span className="size-2 rounded-full bg-current" />
-          )}
-          {status.label}
-        </span>
-        <p className="text-muted-foreground mt-3 text-sm">
-          {exchangeFormatTitle[item.exchange_format]}
-        </p>
-        <h2 className="mt-1 text-lg leading-6 font-semibold">{item.title}</h2>
-        {detail && <p className="mt-1 text-sm">{detail}</p>}
-        {district && (
-          <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-sm">
-            <MapPin className="size-3.5 shrink-0" />
-            {district}
-          </p>
-        )}
-        <div className="mt-auto pt-4">
-          {given ? (
-            <Button
-              render={<Link to={`/item/${item.id}`} />}
-              nativeButton={false}
-              variant="secondary"
-              className="h-11 w-full rounded-xl font-semibold"
-            >
-              Посмотреть
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="secondary"
-              className="h-11 w-full rounded-xl font-semibold"
-            >
-              <Pencil /> Редактировать
-            </Button>
+            <Camera className="size-11" />
           )}
         </div>
-      </div>
-    </li>
+        <div className="flex flex-1 flex-col p-4">
+          <span
+            className={`flex items-center justify-between text-sm font-semibold ${status.className}`}
+          >
+            <div className="flex items-center gap-2">
+              {StatusIcon ? (
+                <StatusIcon className="size-4" />
+              ) : (
+                <span className="size-2 rounded-full bg-current" />
+              )}
+              {status.label}{" "}
+            </div>
+            {(item.status ?? "active") !== "active" && (
+              <Button
+                type="button"
+                disabled={updateItem.isPending}
+                onClick={() => {
+                  activateItem(item.id.toString());
+                }}
+                className=""
+              >
+                {updateItem.isPending ? "Обновляем..." : "Опубликовать"}
+              </Button>
+            )}
+          </span>
+          <p className="text-muted-foreground mt-3 text-sm">
+            {exchangeFormatTitle[item.exchange_format]}
+          </p>
+          <h2 className="mt-1 text-lg leading-6 font-semibold">{item.title}</h2>
+          {detail && <p className="mt-1 text-sm">{detail}</p>}
+          {district && (
+            <p className="text-muted-foreground mt-2 flex items-center gap-1.5 text-sm">
+              <MapPin className="size-3.5 shrink-0" />
+              {district}
+            </p>
+          )}
+          <div className="mt-auto flex gap-2 pt-4">
+            {given ? (
+              <Button
+                render={<Link to={`/item/${item.id}`} />}
+                nativeButton={false}
+                variant="secondary"
+                className="h-11 min-w-0 flex-1 rounded-xl px-2 font-semibold"
+              >
+                Посмотреть
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="secondary"
+                className="h-11 min-w-0 flex-1 rounded-xl px-2 font-semibold"
+                onClick={() => setEditOpen(true)}
+              >
+                <Pencil /> Редактировать
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="destructive"
+              className="h-11 shrink-0 rounded-xl px-3 font-semibold"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 /> Удалить
+            </Button>
+          </div>
+        </div>
+      </li>
+      {editOpen && (
+        <EditItemDialog
+          item={item}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
+      )}
+      {deleteOpen && (
+        <DeleteItemDialog
+          item={item}
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+        />
+      )}
+      {activationError && (
+        <Alert variant="destructive">
+          <AlertTitle>Не удалось активировать объявление</AlertTitle>
+          <AlertDescription>{activationError}</AlertDescription>
+        </Alert>
+      )}
+    </>
   );
 }

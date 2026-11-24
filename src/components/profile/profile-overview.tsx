@@ -7,8 +7,9 @@ import { exchangeMoment, exchangeStatusLabel, formatDayMonth } from "./format";
 import { MediaCover } from "./media-cover";
 
 export function ProfileOverview({ onHistory }: { onHistory: () => void }) {
-  const { data, isLoading, isError } = useExchanges();
-  const latest = [...(data ?? [])].sort(
+  const { data: exchangePage, isLoading, isError } = useExchanges();
+  const exchanges = exchangePage?.results ?? [];
+  const latest = [...exchanges].sort(
     (a, b) =>
       new Date(exchangeMoment(b)).getTime() -
       new Date(exchangeMoment(a)).getTime(),
@@ -30,7 +31,7 @@ export function ProfileOverview({ onHistory }: { onHistory: () => void }) {
           {!isLoading && isError && (
             <p className="mt-3.5 text-sm">Ошибка загрузки данных</p>
           )}
-          {!isLoading && !isError && !data?.length && (
+          {!isLoading && !isError && !exchanges.length && (
             <p className="text-muted-foreground mt-3.5 text-sm">
               Пока нет передач
             </p>

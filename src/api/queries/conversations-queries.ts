@@ -3,12 +3,13 @@ import type {
   TConversationCreateRequest,
   TConversationMessage,
   TConversationReadResponse,
+  TPaginatedConversationList,
 } from "@/types";
 import { api } from "../api";
 
 export const conversationsQueries = {
   getConversations: async () => {
-    const res = await api.get<TConversation[]>("/conversations");
+    const res = await api.get<TPaginatedConversationList>("/conversations");
     return res.data;
   },
 

@@ -1,9 +1,9 @@
-import type { TExchange } from "@/types";
+import type { TExchange, TPaginatedExchangeList } from "@/types";
 import { api } from "../api";
 
 export const exchangesQueries = {
   getExchanges: async () => {
-    const res = await api.get<TExchange[]>("/exchanges");
+    const res = await api.get<TPaginatedExchangeList>("/exchanges");
     return res.data;
   },
 

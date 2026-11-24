@@ -9,6 +9,7 @@ export function useUpdateItem() {
     mutationFn: ({ id, itemData }) => itemsQueries.updateItem(id, itemData),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
+      queryClient.invalidateQueries({ queryKey: ["my-items"] });
       queryClient.invalidateQueries({
         queryKey: ["items", variables.id],
       });

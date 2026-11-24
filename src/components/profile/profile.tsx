@@ -60,7 +60,12 @@ export function Profile() {
           </Link>
           <ChevronRight />
           {tab === "profile" ? (
-            <span>Мой профиль</span>
+            <Link
+              to="/profile"
+              className="hover:underline hover:underline-offset-4"
+            >
+              Мой профиль
+            </Link>
           ) : (
             <>
               <button
@@ -71,7 +76,12 @@ export function Profile() {
                 Мой профиль
               </button>
               <ChevronRight />
-              <span>{current?.label}</span>
+              <Link
+                to={`?tab=${tab}`}
+                className="hover:underline hover:underline-offset-4"
+              >
+                {current?.label}
+              </Link>
             </>
           )}
         </nav>

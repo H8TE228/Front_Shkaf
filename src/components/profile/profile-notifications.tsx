@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Calendar, Check, Package } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -53,18 +54,21 @@ function notificationCopy(notification: TNotification) {
 }
 
 export function ProfileNotifications() {
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useNotifications();
-  const { mutate: markRead, isPending: isMarking, variables } =
-    useMarkNotificationRead();
+  const {
+    mutate: markRead,
+    isPending: isMarking,
+    variables,
+  } = useMarkNotificationRead();
   const { mutate: markAll, isPending: isMarkingAll } =
     useMarkAllNotificationsRead();
   const [params, setParams] = useSearchParams();
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const subscriptionsOpen = params.get("section") === "subscriptions";
-  const notifications = data ?? [];
+  const notifications = data?.results ?? [];
   const unread = notifications.filter((item) => !item.read_at);
-  const visible =
-    filter === "unread" ? unread : notifications;
+  const visible = filter === "unread" ? unread : notifications;
 
   if (subscriptionsOpen) return <ProfileSubscriptions />;
 
@@ -86,7 +90,11 @@ export function ProfileNotifications() {
 
       <section className="border-border bg-card overflow-hidden rounded-2xl border">
         <div className="border-border flex flex-wrap items-center gap-2 border-b px-4 py-3">
-          <div className="flex gap-1.5" role="group" aria-label="Фильтр уведомлений">
+          <div
+            className="flex gap-1.5"
+            role="group"
+            aria-label="Фильтр уведомлений"
+          >
             {(
               [
                 ["all", "Все"],
@@ -144,7 +152,10 @@ export function ProfileNotifications() {
               return (
                 <li
                   key={notification.id}
-                  className="flex items-start gap-3 px-4 py-4"
+                  onClick={() =>
+                    navigate(`/item/${(notification!.payload as any).item_id}`)
+                  }
+                  className="flex cursor-pointer items-start gap-3 px-4 py-4"
                 >
                   {unreadItem && (
                     <span className="bg-primary mt-5 size-2 shrink-0 rounded-full" />
@@ -169,8 +180,11 @@ export function ProfileNotifications() {
                       <button
                         type="button"
                         disabled={isMarking && variables === notification.id}
-                        onClick={() => markRead(notification.id)}
-                        className="text-primary mt-2 inline-flex cursor-pointer items-center gap-1 text-sm font-semibold disabled:opacity-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markRead(notification.id);
+                        }}
+                        className="text-primary hover:text-primary/80 mt-2 inline-flex cursor-pointer items-center gap-1 text-sm font-semibold disabled:opacity-50"
                       >
                         <Check className="size-4" />
                         Отметить прочитанным

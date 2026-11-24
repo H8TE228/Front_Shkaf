@@ -55,9 +55,12 @@ export function ProfileNav({
   const notifications = useNotifications();
   const conversations = useConversations();
   const unreadNotifications =
-    notifications.data?.filter((item) => !item.read_at).length ?? 0;
+    notifications.data?.results.filter((item) => !item.read_at).length ?? 0;
   const unreadChats =
-    conversations.data?.reduce((sum, item) => sum + item.unread_count, 0) ?? 0;
+    conversations.data?.results.reduce(
+      (sum, item) => sum + item.unread_count,
+      0,
+    ) ?? 0;
 
   function badge(id: string) {
     if (id === "notifications") return unreadNotifications;
@@ -79,7 +82,11 @@ export function ProfileNav({
           </span>
         )}
       </div>
-      <div className="mt-2 grid gap-1" role="tablist" aria-label="Разделы профиля">
+      <div
+        className="mt-2 grid gap-1"
+        role="tablist"
+        aria-label="Разделы профиля"
+      >
         {profileNav.map((item) => {
           const Icon = item.icon;
           const className =

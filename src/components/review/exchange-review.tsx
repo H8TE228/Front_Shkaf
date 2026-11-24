@@ -31,7 +31,9 @@ export function ExchangeReview({
   const { mutate, isPending, isError } = useCreateReview();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const person = users.data?.find((entry) => String(entry.id) === userId);
+  const person = users.data?.results.find(
+    (entry) => String(entry.id) === userId,
+  );
   const name = person ? personName(person) : "";
   const title = name ? `Профиль ${name}` : "Профиль";
   const size = item.data?.size?.trim();

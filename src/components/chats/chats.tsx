@@ -61,7 +61,8 @@ function formatStamp(value: string) {
 
 export function Chats() {
   const { data: user } = useMe();
-  const { data: conversations, isLoading, isError } = useConversations();
+  const { data: conversationPage, isLoading, isError } = useConversations();
+  const conversations = conversationPage?.results;
   const [selectedId, setSelectedId] = useState("");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ChatListFilter>("all");
@@ -129,7 +130,12 @@ export function Chats() {
             Главная
           </Link>
           <ChevronRight />
-          <span>Чаты</span>
+          <Link
+            to="/chats"
+            className="hover:underline hover:underline-offset-4"
+          >
+            Чаты
+          </Link>
         </nav>
         <h1 className="mb-6 text-[32px] leading-10 font-semibold tracking-tight">
           Чаты
@@ -535,7 +541,7 @@ function CompanionAvatar({
   large = false,
 }: {
   name: string;
-  avatar?: string;
+  avatar?: string | null;
   selected?: boolean;
   large?: boolean;
 }) {

@@ -8,6 +8,7 @@ export function useDeleteItem() {
     mutationFn: itemsQueries.deleteItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
+      queryClient.invalidateQueries({ queryKey: ["my-items"] });
     },
     onError: (error) => {
       console.error("Ошибка при удалении объявления", error);

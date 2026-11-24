@@ -76,10 +76,7 @@ export function ItemOwnerActions({ item }: { item: TItem }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const updateItem = useUpdateItem();
-  const deleteItem = useDeleteItem();
-  const actionPending = updateItem.isPending || deleteItem.isPending;
 
   function activateItem() {
     setActivationError(null);
@@ -122,9 +119,8 @@ export function ItemOwnerActions({ item }: { item: TItem }) {
           type="button"
           variant="destructive"
           className="h-11"
-          disabled={actionPending}
+          disabled={updateItem.isPending}
           onClick={() => {
-            setDeleteError(null);
             setDeleteOpen(true);
           }}
         >
@@ -139,58 +135,14 @@ export function ItemOwnerActions({ item }: { item: TItem }) {
         </Alert>
       )}
 
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Удалить объявление?</DialogTitle>
-            <DialogDescription>
-              Объявление «{item.title}» будет удалено без возможности
-              восстановления.
-            </DialogDescription>
-          </DialogHeader>
-          {deleteError && (
-            <Alert variant="destructive">
-              <AlertTitle>Не удалось удалить объявление</AlertTitle>
-              <AlertDescription>{deleteError}</AlertDescription>
-            </Alert>
-          )}
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11"
-              disabled={deleteItem.isPending}
-              onClick={() => setDeleteOpen(false)}
-            >
-              Отмена
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="h-11"
-              disabled={deleteItem.isPending}
-              onClick={() => {
-                deleteItem.mutate(String(item.id), {
-                  onSuccess: () => {
-                    setDeleteOpen(false);
-                    navigate("/catalog", { replace: true });
-                  },
-                  onError: (error) => {
-                    setDeleteError(
-                      getErrorMessage(
-                        error,
-                        "Не удалось удалить объявление. Попробуйте ещё раз.",
-                      ),
-                    );
-                  },
-                });
-              }}
-            >
-              {deleteItem.isPending ? "Удаляем..." : "Удалить"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {deleteOpen && (
+        <DeleteItemDialog
+          item={item}
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          onDeleted={() => navigate("/catalog", { replace: true })}
+        />
+      )}
 
       {editOpen && (
         <EditItemDialog
@@ -203,7 +155,77 @@ export function ItemOwnerActions({ item }: { item: TItem }) {
   );
 }
 
-function EditItemDialog({
+export function DeleteItemDialog({
+  item,
+  open,
+  onOpenChange,
+  onDeleted,
+}: {
+  item: TItem;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDeleted?: () => void;
+}) {
+  const deleteItem = useDeleteItem();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Удалить объявление?</DialogTitle>
+          <DialogDescription>
+            Объявление «{item.title}» будет удалено без возможности
+            восстановления.
+          </DialogDescription>
+        </DialogHeader>
+        {deleteError && (
+          <Alert variant="destructive">
+            <AlertTitle>Не удалось удалить объявление</AlertTitle>
+            <AlertDescription>{deleteError}</AlertDescription>
+          </Alert>
+        )}
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11"
+            disabled={deleteItem.isPending}
+            onClick={() => onOpenChange(false)}
+          >
+            Отмена
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            className="h-11"
+            disabled={deleteItem.isPending}
+            onClick={() => {
+              deleteItem.mutate(String(item.id), {
+                onSuccess: () => {
+                  onOpenChange(false);
+                  onDeleted?.();
+                },
+                onError: (error) => {
+                  setDeleteError(
+                    getErrorMessage(
+                      error,
+                      "Не удалось удалить объявление. Попробуйте ещё раз.",
+                    ),
+                  );
+                },
+              });
+            }}
+          >
+            {deleteItem.isPending ? "Удаляем..." : "Удалить"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function EditItemDialog({
   item,
   open,
   onOpenChange,

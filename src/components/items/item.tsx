@@ -85,15 +85,18 @@ const YandexPreview = lazy(async () => {
     return (
       <div className="h-55 overflow-hidden rounded-xl">
         <maps.YMap
-          location={maps.reactify.useDefault(
-            { center, zoom: 14 },
-            [longitude, latitude],
-          )}
+          location={maps.reactify.useDefault({ center, zoom: 14 }, [
+            longitude,
+            latitude,
+          ])}
         >
           <maps.YMapDefaultSchemeLayer />
           <maps.YMapDefaultFeaturesLayer />
           <maps.YMapMarker
-            coordinates={maps.reactify.useDefault(center, [longitude, latitude])}
+            coordinates={maps.reactify.useDefault(center, [
+              longitude,
+              latitude,
+            ])}
           >
             <div className="bg-primary border-card size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 shadow" />
           </maps.YMapMarker>
@@ -128,6 +131,7 @@ export function Item() {
   const { data: user, isLoading: meLoading } = useMe();
   const { data: item, isLoading, isError } = useItemById(id ?? "");
   const { data: items } = useItems();
+  const itemsData = items?.results;
   const { data: users, isError: usersError } = useUsers();
   const { data: bookmarks } = useBookmarks({ type: "item" });
   const bookmarksData = bookmarks?.results;
@@ -144,9 +148,9 @@ export function Item() {
   );
   const isOwner = !!user && user.id === item?.owner_id;
   const ready = !isLoading && !isError && !!item;
-  const owner = users?.find((entry) => entry.id === item?.owner_id);
+  const owner = users?.results.find((entry) => entry.id === item?.owner_id);
   const ownerName = !usersError && owner ? personName(owner) : "";
-  const similar = (items ?? [])
+  const similar = (itemsData ?? [])
     .filter(
       (entry) => entry.id !== item?.id && entry.item_type === item?.item_type,
     )
@@ -273,7 +277,7 @@ export function Item() {
                   className="size-11 rounded-lg"
                 >
                   <Heart
-                    className={`size-5 ${bookmarked ? "fill-current text-primary" : ""}`}
+                    className={`size-5 ${bookmarked ? "text-primary fill-current" : ""}`}
                   />
                 </Button>
                 <Button
@@ -361,6 +365,7 @@ function ItemDetails({
   onShare: () => void;
 }) {
   const showMap = hasCoordinates(item);
+  const navigate = useNavigate();
 
   return (
     <section className="mx-auto mb-12 grid w-full max-w-[1550px] grid-cols-1 items-start gap-5 px-6 lg:grid-cols-[7fr_5fr] lg:px-0">
@@ -414,7 +419,14 @@ function ItemDetails({
 
       <aside className="top-24 [@media(min-width:1024px)_and_(min-height:601px)]:sticky">
         <div className="border-border bg-card grid content-start gap-4 rounded-2xl border p-6">
-          <div className="flex items-center gap-3">
+          <div
+            onClick={() => {
+              if (owner?.id !== undefined) {
+                navigate(`/users/${owner?.id}`);
+              }
+            }}
+            className="flex cursor-pointer items-center gap-3"
+          >
             {owner && (owner.avatar || ownerName) ? (
               <UserAvatar
                 src={owner.avatar}
@@ -425,9 +437,13 @@ function ItemDetails({
               <span className="bg-muted size-12 shrink-0 rounded-full" />
             )}
             <div className="min-w-0">
-              {ownerName && (
-                <p className="truncate font-semibold">{ownerName}</p>
-              )}
+              {ownerName ||
+                (owner?.username && (
+                  <p className="truncate font-semibold">
+                    {ownerName || owner.username}
+                  </p>
+                )) ||
+                "Имя не загружено"}
               <p className="text-muted-foreground text-sm leading-5">
                 Владелец вещи
               </p>
@@ -449,7 +465,6 @@ function ItemDetails({
             </Button>
           )}
           {isOwner && <ItemOwnerActions item={item} />}
-        </div>
 
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -461,7 +476,7 @@ function ItemDetails({
               className="h-12 rounded-xl"
             >
               <Heart
-                className={`size-5 ${bookmarked ? "fill-current text-primary" : ""}`}
+                className={`size-5 ${bookmarked ? "text-primary fill-current" : ""}`}
               />
               В избранное
             </Button>
@@ -568,7 +583,9 @@ function ItemGallery({
               aria-pressed={index === current}
               onClick={() => api?.scrollTo(index)}
               className={`size-20 shrink-0 overflow-hidden rounded-xl border-2 ${
-                index === current ? "border-primary" : "border-border opacity-60"
+                index === current
+                  ? "border-primary"
+                  : "border-border opacity-60"
               }`}
             >
               <img
@@ -576,7 +593,7 @@ function ItemGallery({
                 alt=""
                 className="size-full object-cover"
               />
-            </Button>
+            </button>
           ))}
         </div>
       )}

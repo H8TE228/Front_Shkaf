@@ -25,6 +25,7 @@ export type TPatchPassword = components["schemas"]["ChangePassword"];
 
 export type TItem = components["schemas"]["Item"];
 export type TPaginatedItemList = components["schemas"]["PaginatedItemList"];
+export type TPaginatedUserList = components["schemas"]["PaginatedUserList"];
 export type TItemsQueryParams = operations["items_list"]["parameters"]["query"];
 export type TItemCreateRequest = Pick<
   components["schemas"]["Item"],
@@ -81,40 +82,12 @@ export type TBookmarksQueryParams = {
   type?: TBookmarkType;
 };
 
-export type TConversationItem = {
-  id: number;
-  title: string;
-  status: components["schemas"]["ItemStatusEnum"];
-  cover: string;
-};
-
-export type TConversationCompanion = {
-  id: number;
-  username: string;
-  first_name: string;
-  last_name: string;
-  avatar: string;
-};
-
-export type TConversationMessage = {
-  id: number;
-  conversation_id: number;
-  sender_id: number;
-  body: string;
-  read_at: string;
-  created_at: string;
-};
-
-export type TConversation = {
-  id: number;
-  item: TConversationItem;
-  owner_id: number;
-  requester_id: number;
-  companion: TConversationCompanion;
-  last_message: TConversationMessage | null;
-  unread_count: number;
-  created_at: string;
-};
+export type TConversationItem = components["schemas"]["ItemBrief"];
+export type TConversationCompanion = components["schemas"]["Participant"];
+export type TConversationMessage = components["schemas"]["Message"];
+export type TConversation = components["schemas"]["Conversation"];
+export type TPaginatedConversationList =
+  components["schemas"]["PaginatedConversationList"];
 
 export type TConversationCreateRequest = {
   item_id: string;
@@ -125,9 +98,7 @@ export type TConversationMessageCreateRequest = {
   body: string;
 };
 
-export type TConversationReadResponse = {
-  marked_read: number;
-};
+export type TConversationReadResponse = components["schemas"]["MarkRead"];
 
 export type TPatchedUser = Pick<
   components["schemas"]["PatchedUser"],
@@ -142,9 +113,13 @@ export type TPatchedUser = Pick<
 >;
 
 export type TNotification = components["schemas"]["Notification"];
+export type TPaginatedNotificationList =
+  components["schemas"]["PaginatedNotificationList"];
 export type TNotificationType = components["schemas"]["TypeEnum"];
 
 export type TExchange = components["schemas"]["Exchange"];
+export type TPaginatedExchangeList =
+  components["schemas"]["PaginatedExchangeList"];
 export type TExchangeStatus = components["schemas"]["ExchangeStatusEnum"];
 
 export type TReview = components["schemas"]["Review"];

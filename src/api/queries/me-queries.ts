@@ -1,6 +1,8 @@
 import type {
   TItem,
   TNotification,
+  TPaginatedItemList,
+  TPaginatedNotificationList,
   TPatchPassword,
   TSubscription,
   TSubscriptionCreateRequest,
@@ -25,7 +27,7 @@ export const meQueries = {
   },
 
   getMyItems: async () => {
-    const res = await api.get<TItem[]>(`/me/items`);
+    const res = await api.get<TPaginatedItemList>(`/me/items`);
     return res.data;
   },
 
@@ -38,7 +40,7 @@ export const meQueries = {
   },
 
   getNotifications: async () => {
-    const res = await api.get<TNotification[]>("/me/notifications");
+    const res = await api.get<TPaginatedNotificationList>("/me/notifications");
     return res.data;
   },
 
