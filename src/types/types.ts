@@ -24,6 +24,7 @@ export type TRegisterResponse = Pick<
 export type TPatchPassword = components["schemas"]["ChangePassword"];
 
 export type TItem = components["schemas"]["Item"];
+export type TPaginatedItemList = components["schemas"]["PaginatedItemList"];
 export type TItemsQueryParams = operations["items_list"]["parameters"]["query"];
 export type TItemCreateRequest = Pick<
   components["schemas"]["Item"],
@@ -61,11 +62,7 @@ export type TExchangePointUpdateRequest = Partial<TExchangePointCreateRequest>;
 export type TExchangePointsQueryParams =
   operations["exchangePoints_list"]["parameters"]["query"];
 
-export type TBookmarkItem = TItem & {
-  latitude: number | null;
-  longitude: number | null;
-  distance: number | null;
-};
+export type TBookmarkItem = components["schemas"]["PaginatedBookmarkList"];
 
 export type TBookmarkExchangePoint = TExchangePoint & {
   distance: number | null;
@@ -120,7 +117,7 @@ export type TConversation = {
 };
 
 export type TConversationCreateRequest = {
-  item_id: number;
+  item_id: string;
 };
 
 export type TConversationMessageCreateRequest = {

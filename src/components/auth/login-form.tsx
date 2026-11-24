@@ -1,7 +1,7 @@
 import { useLogin } from "@/hooks/auth/use-login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import z from "zod";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
@@ -16,6 +16,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { mutate, isPending } = useLogin();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -34,7 +35,8 @@ export function LoginForm() {
     mutate(data, {
       onSuccess: () => {
         form.reset();
-        navigate("/profile");
+        const from = location.state?.from?.pathname;
+        navigate(typeof from === "string" ? from : "/profile");
       },
       onError: (error) => {
         const message = error.response?.data.detail;

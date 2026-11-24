@@ -69,16 +69,17 @@ export function Chats() {
   const log = useRef<HTMLDivElement>(null);
   const { mutate: markRead } = useMarkConversationRead();
   const { mutate: sendMessage, isPending: isSending } = useSendMessage();
+  const activeId = selectedId || String(conversations?.[0]?.id ?? "");
   const {
     data: messages,
     isLoading: messagesLoading,
     isError: messagesError,
-  } = useConversationMessages(selectedId);
+  } = useConversationMessages(activeId);
 
   const conversation = conversations?.find(
-    (entry) => String(entry.id) === selectedId,
+    (entry) => String(entry.id) === activeId,
   );
-  const draft = drafts[selectedId] ?? "";
+  const draft = drafts[activeId] ?? "";
   const needle = query.trim().toLocaleLowerCase("ru");
   const list = (conversations ?? []).filter((entry) => {
     const name = companionName(entry.companion);
@@ -91,14 +92,14 @@ export function Chats() {
 
   useEffect(() => {
     if (selectedId || !conversations?.[0]) return;
-    const id = String(conversations[0].id);
-    setSelectedId(id);
-    if (conversations[0].unread_count > 0) markRead(id);
+    if (conversations[0].unread_count > 0) {
+      markRead(String(conversations[0].id));
+    }
   }, [conversations, markRead, selectedId]);
 
   useEffect(() => {
     if (log.current) log.current.scrollTop = log.current.scrollHeight;
-  }, [selectedId, messages?.length]);
+  }, [activeId, messages?.length]);
 
   function openConversation(id: string) {
     setSelectedId(id);
@@ -166,7 +167,7 @@ export function Chats() {
               messagesLoading={messagesLoading}
               messagesError={messagesError}
               userId={user?.id}
-              selectedId={selectedId}
+              selectedId={activeId}
               query={query}
               filter={filter}
               draft={draft}
@@ -176,7 +177,7 @@ export function Chats() {
               onFilter={setFilter}
               onOpen={openConversation}
               onDraft={(value) =>
-                setDrafts((current) => ({ ...current, [selectedId]: value }))
+                setDrafts((current) => ({ ...current, [activeId]: value }))
               }
               onSubmit={submitMessage}
             />
@@ -499,6 +500,12 @@ function ChatPanes({
                 maxLength={1500}
                 value={draft}
                 onChange={(event) => onDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" || event.shiftKey) return;
+                  event.preventDefault();
+                  if (!draft.trim() || isSending) return;
+                  onSubmit();
+                }}
                 className="border-border bg-card focus-visible:border-ring focus-visible:ring-ring/30 max-h-[120px] min-h-11 flex-1 resize-none rounded-2xl border px-3.5 py-2.5 leading-[22px] outline-none focus-visible:ring-3"
               />
               <Button

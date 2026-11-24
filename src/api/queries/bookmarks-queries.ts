@@ -1,9 +1,9 @@
-import type { TBookmark, TBookmarksQueryParams } from "@/types";
+import type { TBookmark, TBookmarkItem, TBookmarksQueryParams } from "@/types";
 import { api } from "../api";
 
 export const bookmarksQueries = {
   getBookmarks: async (params?: TBookmarksQueryParams) => {
-    const res = await api.get<TBookmark[]>("/me/bookmarks", { params });
+    const res = await api.get<TBookmarkItem>("/me/bookmarks", { params });
     return res.data;
   },
 

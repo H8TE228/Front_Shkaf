@@ -1,9 +1,14 @@
-import type { TItem, TItemPhoto, TItemsQueryParams } from "@/types";
+import type {
+  TItem,
+  TItemPhoto,
+  TItemsQueryParams,
+  TPaginatedItemList,
+} from "@/types";
 import { api } from "../api";
 
 export const itemsQueries = {
   getItems: async (params?: TItemsQueryParams) => {
-    const res = await api.get<TItem[]>("/items", { params });
+    const res = await api.get<TPaginatedItemList>("/items", { params });
     return res.data;
   },
 
@@ -12,15 +17,15 @@ export const itemsQueries = {
     return res.data;
   },
 
-  createItem: async (itemData: unknown) => {
+  createItem: async (itemData: FormData) => {
     const res = await api.post<TItem>("/items", itemData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
 
-  updateItem: async (id: string, itemData: unknown) => {
-    const res = await api.put<TItem>(`/items/${id}`, itemData, {
+  updateItem: async (id: string, itemData: FormData) => {
+    const res = await api.patch<TItem>(`/items/${id}`, itemData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
@@ -32,14 +37,14 @@ export const itemsQueries = {
   },
 
   createItemPhoto: async (id: string, photoData: FormData) => {
-    const res = await api.post<TItemPhoto>(`/items/${id}/photo`, photoData, {
+    const res = await api.post<TItemPhoto>(`/items/${id}/photos`, photoData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
 
   deleteItemPhotoById: async (id: string, photoId: string) => {
-    const res = await api.delete<void>(`/items/${id}/photo/${photoId}`);
+    const res = await api.delete<void>(`/items/${id}/photos/${photoId}`);
     return res.data;
   },
 };

@@ -30,7 +30,7 @@ export function LocationButton() {
       localStorage.setItem(STORAGE_KEY_LOCATION_ATTEMPTED, "true");
       handleGetLocation();
     }
-  }, []);
+  }, [location]);
 
   function handleGetLocation() {
     if (!navigator.geolocation) {
@@ -90,14 +90,16 @@ export function LocationButton() {
         onClick={handleGetLocation}
         type="button"
         disabled={isLoading}
-        className="text-foreground hover:text-foreground/80 h-10 shrink-0 cursor-pointer items-center justify-start gap-2 rounded-xl bg-transparent px-4 text-sm hover:bg-transparent lg:flex"
+        className="text-foreground hover:text-foreground/80 h-10 shrink-0 cursor-pointer items-center justify-start gap-2 rounded-xl bg-transparent px-2 text-sm hover:bg-transparent sm:px-4 lg:flex"
       >
         <MapPin className="size-6" />
-        {isLoading
-          ? "Определяем..."
-          : location
-            ? location.city
-            : "Определить город"}
+        <span>
+          {isLoading
+            ? "Определяем..."
+            : location
+              ? location.city
+              : "Определить город"}
+        </span>
       </Button>
     </div>
   );
