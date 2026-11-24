@@ -12,4 +12,6 @@ export * from "./mobile-search-dialog";
 export * from "./points";
 export * from "./favorites";
 export * from "./chats";
+export * from "./user-profile";
+export * from "./review";
 export * from "./my-items";

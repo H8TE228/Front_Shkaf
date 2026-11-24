@@ -7,3 +7,4 @@ export * from "./exchange-points-queries";
 export * from "./bookmarks-queries";
 export * from "./conversations-queries";
 export * from "./exchanges-queries";
+export * from "./reviews-queries";
