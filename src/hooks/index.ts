@@ -7,3 +7,6 @@ export * from "./me";
 export * from "./bookmarks";
 export * from "./mobile-search";
 export * from "./conversations";
+export * from "./exchanges";
+export * from "./reviews";
+export * from "./users";

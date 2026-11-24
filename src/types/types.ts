@@ -128,3 +128,40 @@ export type TConversationMessageCreateRequest = {
 export type TConversationReadResponse = {
   marked_read: number;
 };
+
+export type TPatchedUser = Pick<
+  components["schemas"]["PatchedUser"],
+  | "username"
+  | "first_name"
+  | "last_name"
+  | "phone_number"
+  | "city"
+  | "district"
+  | "avatar"
+  | "email"
+>;
+
+export type TNotification = components["schemas"]["Notification"];
+export type TNotificationType = components["schemas"]["TypeEnum"];
+
+export type TExchange = components["schemas"]["Exchange"];
+export type TExchangeStatus = components["schemas"]["ExchangeStatusEnum"];
+
+export type TReview = components["schemas"]["Review"];
+export type TReviewCreateRequest = {
+  exchange_id: number;
+  rating: number;
+  comment?: string;
+};
+export type TReviewsQueryParams = {
+  author?: number;
+  rating?: number;
+  target_user?: number;
+};
+
+export type TRating = components["schemas"]["Rating"];
+
+export type TSubscription = components["schemas"]["Subscription"];
+export type TSubscriptionCreateRequest = {
+  item_type?: number | null;
+};

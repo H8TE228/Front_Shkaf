@@ -53,7 +53,7 @@ function todayHours(point: TBookmarkExchangePoint) {
   );
 }
 
-export function Favorites() {
+export function Favorites({ embedded = false }: { embedded?: boolean }) {
   const [tab, setTab] = useState<TBookmarkType>("item");
   const [undo, setUndo] = useState<{ kind: TBookmarkType; id: string } | null>(
     null,
@@ -115,30 +115,29 @@ export function Favorites() {
 
   return (
     <div>
-      <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
-        <nav className="text-muted-foreground mb-5 flex items-center gap-2 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
-          <Link to="/" className="hover:underline hover:underline-offset-4">
-            Главная
-          </Link>
-          <ChevronRight />
-          <Link
-            to="/favorites"
-            className="hover:underline hover:underline-offset-4"
-          >
+      {!embedded && (
+        <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
+          <nav className="text-muted-foreground mb-5 flex items-center gap-2 text-sm [&_svg]:size-4 [&_svg]:shrink-0">
+            <Link to="/" className="hover:underline hover:underline-offset-4">
+              Главная
+            </Link>
+            <ChevronRight />
+            <span>Избранное</span>
+          </nav>
+          <h1 className="mb-6 text-[32px] leading-10 font-semibold tracking-tight">
             Избранное
-          </Link>
-        </nav>
-        <h1 className="mb-6 text-[32px] leading-10 font-semibold tracking-tight">
-          Избранное
-        </h1>
-      </section>
+          </h1>
+        </section>
+      )}
 
-      <section className="mx-auto w-full max-w-[1550px] px-6 pb-12 lg:px-0">
-        <div
-          className="mb-3 flex gap-1.5"
-          role="group"
-          aria-label="Разделы избранного"
-        >
+      <section
+        className={
+          embedded
+            ? undefined
+            : "mx-auto w-full max-w-[1550px] px-6 pb-12 lg:px-0"
+        }
+      >
+        <div className="mb-3 flex gap-1.5" role="group" aria-label="Разделы избранного">
           {tabs.map(([id, label, count]) => (
             <button
               key={id}
