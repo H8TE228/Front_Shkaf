@@ -33,6 +33,7 @@ import {
   useCreateItemBookmark,
   useDeleteItemBookmark,
   useItemById,
+  useItemExchanges,
   useItems,
   useMe,
   useUsers,
@@ -147,6 +148,15 @@ export function Item() {
     (bookmark) => bookmark.item?.id === item?.id,
   );
   const isOwner = !!user && user.id === item?.owner_id;
+  const dealLocked = !!item?.status && item.status !== "active";
+  const { data: itemExchanges } = useItemExchanges(
+    dealLocked && user && item ? String(item.id) : "",
+  );
+  const inDeal = !!itemExchanges?.results.some(
+    (exchange) =>
+      exchange.giver_id === user?.id || exchange.receiver_id === user?.id,
+  );
+  const showWrite = !dealLocked || inDeal;
   const ready = !isLoading && !isError && !!item;
   const owner = users?.results.find((entry) => entry.id === item?.owner_id);
   const ownerName = !usersError && owner ? personName(owner) : "";
@@ -255,6 +265,16 @@ export function Item() {
           <>
             <div className="mb-6 flex items-start justify-between gap-4">
               <div className="min-w-0">
+                {item.status === "reserved" && (
+                  <p className="text-primary mb-1 text-sm font-medium">
+                    Товар зарезервирован
+                  </p>
+                )}
+                {item.status === "given" && (
+                  <p className="text-primary mb-1 text-sm font-medium">
+                    Товар передан
+                  </p>
+                )}
                 <h1 className="text-[32px] leading-10 font-semibold tracking-tight">
                   {item.title}
                 </h1>
@@ -315,6 +335,7 @@ export function Item() {
           owner={usersError ? undefined : owner}
           ownerName={ownerName}
           isOwner={isOwner}
+          showWrite={showWrite}
           meLoading={meLoading}
           conversationPending={conversationPending}
           onWriteClick={onWriteClick}
@@ -344,6 +365,7 @@ function ItemDetails({
   owner,
   ownerName,
   isOwner,
+  showWrite,
   meLoading,
   conversationPending,
   onWriteClick,
@@ -356,6 +378,7 @@ function ItemDetails({
   owner?: TUser;
   ownerName: string;
   isOwner: boolean;
+  showWrite: boolean;
   meLoading: boolean;
   conversationPending: boolean;
   onWriteClick: () => void;
@@ -454,7 +477,7 @@ function ItemDetails({
             {exchangeFormatTitle[item.exchange_format]}
           </p>
 
-          {!meLoading && !isOwner && (
+          {!meLoading && !isOwner && showWrite && (
             <Button
               type="button"
               disabled={conversationPending}

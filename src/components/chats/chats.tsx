@@ -1,10 +1,18 @@
 import { Fragment, useEffect, useRef, useState, type RefObject } from "react";
 import { Link } from "react-router-dom";
-import { Camera, ChevronRight, Search, Send, X } from "lucide-react";
+import { Camera, Check, ChevronRight, MapPin, Search, Send, X } from "lucide-react";
 import { Button } from "../ui/button";
 import {
+  useAgreeExchange,
+  useCancelExchange,
+  useConfirmExchange,
   useConversationMessages,
   useConversations,
+  useCreateItemExchange,
+  useDeclineExchange,
+  useExchanges,
+  useItemById,
+  useItemExchanges,
   useMarkConversationRead,
   useMe,
   useSendMessage,
@@ -13,14 +21,48 @@ import type {
   TConversation,
   TConversationCompanion,
   TConversationMessage,
+  TExchange,
+  TItem,
 } from "@/types";
 
-type ChatListFilter = "all" | "unread";
+type ChatListFilter = "all" | "unread" | "transferred";
 
 const filters: [ChatListFilter, string][] = [
   ["all", "Все"],
   ["unread", "Непрочитанные"],
+  ["transferred", "Переданы"],
 ];
+
+const exchangeFormatTitle: Record<TItem["exchange_format"], string> = {
+  free: "Бесплатно",
+  swap: "Обмен",
+  points: "За баллы",
+};
+
+const exchangeCreateStarted = new Set<string>();
+
+function dealExchange(conversation: TConversation, exchanges: TExchange[]) {
+  const matches = exchanges.filter(
+    (exchange) =>
+      exchange.giver_id === conversation.owner_id &&
+      exchange.receiver_id === conversation.requester_id &&
+      exchange.item.id === conversation.item.id,
+  );
+  return matches.sort(
+    (a, b) =>
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+  )[0];
+}
+
+function isTransferred(conversation: TConversation, exchanges: TExchange[]) {
+  return exchanges.some(
+    (exchange) =>
+      exchange.status === "completed" &&
+      exchange.giver_id === conversation.owner_id &&
+      exchange.receiver_id === conversation.requester_id &&
+      exchange.item.id === conversation.item.id,
+  );
+}
 
 function companionName(companion: TConversationCompanion) {
   const name = [companion.first_name, companion.last_name]
@@ -63,6 +105,11 @@ export function Chats() {
   const { data: user } = useMe();
   const { data: conversationPage, isLoading, isError } = useConversations();
   const conversations = conversationPage?.results;
+  const { data: completedPage } = useExchanges({
+    status: "completed",
+    page_size: Math.max(conversationPage?.count ?? 0, 1),
+  });
+  const completed = completedPage?.results ?? [];
   const [selectedId, setSelectedId] = useState("");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ChatListFilter>("all");
@@ -84,9 +131,12 @@ export function Chats() {
   const needle = query.trim().toLocaleLowerCase("ru");
   const list = (conversations ?? []).filter((entry) => {
     const name = companionName(entry.companion);
-    const unreadMatch = filter === "all" || entry.unread_count > 0;
+    const filterMatch =
+      filter === "all" ||
+      (filter === "unread" && entry.unread_count > 0) ||
+      (filter === "transferred" && isTransferred(entry, completed));
     return (
-      unreadMatch &&
+      filterMatch &&
       `${name} ${entry.item.title}`.toLocaleLowerCase("ru").includes(needle)
     );
   });
@@ -168,6 +218,7 @@ export function Chats() {
             <ChatPanes
               list={list}
               conversations={conversations}
+              completed={completed}
               conversation={conversation}
               messages={messages}
               messagesLoading={messagesLoading}
@@ -196,6 +247,7 @@ export function Chats() {
 function ChatPanes({
   list,
   conversations,
+  completed,
   conversation,
   messages,
   messagesLoading,
@@ -215,6 +267,7 @@ function ChatPanes({
 }: {
   list: TConversation[];
   conversations: TConversation[];
+  completed: TExchange[];
   conversation?: TConversation;
   messages?: TConversationMessage[];
   messagesLoading: boolean;
@@ -232,8 +285,74 @@ function ChatPanes({
   onDraft: (value: string) => void;
   onSubmit: () => void;
 }) {
+  const itemId = conversation ? String(conversation.item.id) : "";
+  const { data: item, isLoading: itemLoading } = useItemById(itemId);
+  const { data: exchangePage, isLoading: exchangesLoading } =
+    useItemExchanges(itemId);
+  const { mutate: createExchange, isPending: createPending } =
+    useCreateItemExchange();
+  const { mutate: agreeExchange, isPending: agreePending } =
+    useAgreeExchange();
+  const { mutate: declineExchange, isPending: declinePending } =
+    useDeclineExchange();
+  const { mutate: cancelExchange, isPending: cancelPending } =
+    useCancelExchange();
+  const { mutate: confirmExchange, isPending: confirmPending } =
+    useConfirmExchange();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const person = conversation ? companionName(conversation.companion) : "";
-  const owner = conversation ? userId === conversation.owner_id : false;
+  const role =
+    userId == null || !conversation
+      ? undefined
+      : userId === conversation.owner_id
+        ? "giver"
+        : userId === conversation.requester_id
+          ? "receiver"
+          : undefined;
+  const exchange = conversation
+    ? dealExchange(conversation, exchangePage?.results ?? [])
+    : undefined;
+  const pending =
+    createPending ||
+    agreePending ||
+    declinePending ||
+    cancelPending ||
+    confirmPending;
+
+  useEffect(() => {
+    setConfirmOpen(false);
+  }, [conversation?.id]);
+
+  useEffect(() => {
+    if (exchange?.status === "completed") setConfirmOpen(false);
+  }, [exchange?.status]);
+
+  useEffect(() => {
+    if (!conversation || userId == null) return;
+    if (userId === conversation.owner_id) return;
+    if (itemLoading || exchangesLoading || !exchangePage) return;
+    const status = item?.status ?? conversation.item.status;
+    if (status && status !== "active") return;
+    const exists = exchangePage.results.some(
+      (entry) =>
+        entry.giver_id === conversation.owner_id &&
+        entry.receiver_id === conversation.requester_id &&
+        entry.item.id === conversation.item.id,
+    );
+    if (exists) return;
+    const key = String(conversation.id);
+    if (exchangeCreateStarted.has(key)) return;
+    exchangeCreateStarted.add(key);
+    createExchange(String(conversation.item.id));
+  }, [
+    conversation,
+    createExchange,
+    exchangePage,
+    exchangesLoading,
+    item,
+    itemLoading,
+    userId,
+  ]);
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:h-[clamp(520px,calc(100dvh-280px),720px)] lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -279,9 +398,11 @@ function ChatPanes({
                 {label}
                 <span className="text-[13px]">
                   {
-                    conversations.filter(
-                      (entry) => id === "all" || entry.unread_count > 0,
-                    ).length
+                    conversations.filter((entry) => {
+                      if (id === "all") return true;
+                      if (id === "unread") return entry.unread_count > 0;
+                      return isTransferred(entry, completed);
+                    }).length
                   }
                 </span>
               </button>
@@ -297,6 +418,7 @@ function ChatPanes({
             const selected = selectedId === String(entry.id);
             const mine = entry.last_message?.sender_id === userId;
             const stamp = entry.last_message?.created_at ?? entry.created_at;
+            const transferred = isTransferred(entry, completed);
             return (
               <li key={entry.id}>
                 <button
@@ -336,6 +458,12 @@ function ChatPanes({
                           {entry.unread_count}
                         </span>
                       )}
+                      {transferred && (
+                        <span className="text-primary inline-flex shrink-0 items-center gap-1 text-[12.5px] font-semibold">
+                          <Check className="size-3.5" />
+                          Передано
+                        </span>
+                      )}
                     </span>
                     <span
                       className={`truncate text-[13.5px] ${
@@ -358,7 +486,11 @@ function ChatPanes({
           {!list.length && (
             <li className="px-3 py-10 text-center">
               <h2 className="text-lg font-semibold">
-                {query ? "Ничего не нашлось" : "Всё прочитано"}
+                {query
+                  ? "Ничего не нашлось"
+                  : filter === "transferred"
+                    ? "Передач пока нет"
+                    : "Всё прочитано"}
               </h2>
               {query && (
                 <p className="text-muted-foreground mt-2">
@@ -387,41 +519,112 @@ function ChatPanes({
       >
         {conversation ? (
           <>
-            <header className="border-border grid shrink-0 grid-cols-1 items-center gap-4 border-b px-5 py-3.5 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
-              <div className="flex min-w-[150px] items-center gap-3">
-                <CompanionAvatar
-                  name={person}
-                  avatar={conversation.companion.avatar}
-                  large
-                />
-                <div>
-                  <h2 className="text-[17px] leading-[22px] font-semibold">
-                    {person}
-                  </h2>
-                  <p className="text-muted-foreground text-[13px] leading-[18px]">
-                    {owner ? "Хочет забрать вещь" : "Владелец вещи"}
-                  </p>
+            <header className="border-border shrink-0 border-b px-5 py-3.5">
+              {confirmOpen ? (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold">
+                      Отметить передачу?
+                    </h3>
+                    <p className="text-muted-foreground text-[13px] leading-5">
+                      После отметки собеседник увидит статус передачи.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setConfirmOpen(false)}
+                      className="h-11 rounded-2xl px-5"
+                    >
+                      Отмена
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={pending || !exchange}
+                      onClick={() => {
+                        if (!exchange) return;
+                        confirmExchange(String(exchange.id), {
+                          onSuccess: () => setConfirmOpen(false),
+                        });
+                      }}
+                      className="h-11 rounded-2xl px-5"
+                    >
+                      Подтвердить
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <Link
-                to={`/item/${conversation.item.id}`}
-                className="hover:text-primary flex min-w-0 items-center gap-3"
-              >
-                {conversation.item.cover ? (
-                  <img
-                    src={conversation.item.cover}
-                    alt=""
-                    className="size-11 shrink-0 rounded-xl object-cover"
+              ) : (
+                <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-6">
+                  <div className="flex min-w-[150px] items-center gap-3">
+                    <CompanionAvatar
+                      name={person}
+                      avatar={conversation.companion.avatar}
+                      large
+                    />
+                    <div>
+                      <h2 className="text-[17px] leading-[22px] font-semibold">
+                        {person}
+                      </h2>
+                      <p className="text-muted-foreground text-[13px] leading-[18px]">
+                        {role === "giver"
+                          ? "Хочет забрать вещь"
+                          : "Владелец вещи"}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/item/${conversation.item.id}`}
+                    className="hover:text-primary flex min-w-0 items-center gap-3"
+                  >
+                    {conversation.item.cover ? (
+                      <img
+                        src={conversation.item.cover}
+                        alt=""
+                        className="size-11 shrink-0 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <span className="bg-muted text-muted-foreground grid size-11 shrink-0 place-items-center rounded-xl">
+                        <Camera className="size-5" />
+                      </span>
+                    )}
+                    <span className="min-w-0">
+                      <strong className="block truncate text-[15px] leading-5 font-semibold">
+                        {conversation.item.title}
+                      </strong>
+                      <span className="text-muted-foreground flex flex-wrap gap-x-3 text-[13px] leading-[18px]">
+                        {item && (
+                          <span>
+                            {exchangeFormatTitle[item.exchange_format]}
+                          </span>
+                        )}
+                        {item?.size && <span>{item.size}</span>}
+                        {item?.district && (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="size-3.5" />
+                            {item.district}
+                          </span>
+                        )}
+                      </span>
+                    </span>
+                  </Link>
+                  <ExchangeActions
+                    exchange={exchange}
+                    role={role}
+                    pending={pending}
+                    onAgree={() =>
+                      exchange && agreeExchange(String(exchange.id))
+                    }
+                    onDecline={() =>
+                      exchange && declineExchange(String(exchange.id))
+                    }
+                    onCancel={() =>
+                      exchange && cancelExchange(String(exchange.id))
+                    }
+                    onAskConfirm={() => setConfirmOpen(true)}
                   />
-                ) : (
-                  <span className="bg-muted text-muted-foreground grid size-11 shrink-0 place-items-center rounded-xl">
-                    <Camera className="size-5" />
-                  </span>
-                )}
-                <strong className="truncate text-[15px] leading-5 font-semibold">
-                  {conversation.item.title}
-                </strong>
-              </Link>
+                </div>
+              )}
             </header>
             <div
               ref={log}
@@ -530,6 +733,119 @@ function ChatPanes({
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function ExchangeActions({
+  exchange,
+  role,
+  pending,
+  onAgree,
+  onDecline,
+  onCancel,
+  onAskConfirm,
+}: {
+  exchange?: TExchange;
+  role?: "giver" | "receiver";
+  pending: boolean;
+  onAgree: () => void;
+  onDecline: () => void;
+  onCancel: () => void;
+  onAskConfirm: () => void;
+}) {
+  if (!exchange) return null;
+
+  if (exchange.status === "completed") {
+    return (
+      <p className="text-primary inline-flex items-center gap-1.5 text-sm font-semibold">
+        <Check className="size-4" />
+        Передано
+      </p>
+    );
+  }
+
+  if (exchange.status === "declined") {
+    return <p className="text-muted-foreground text-sm">Заявка отклонена</p>;
+  }
+
+  if (exchange.status === "cancelled") {
+    return <p className="text-muted-foreground text-sm">Сделка отменена</p>;
+  }
+
+  if (exchange.status === "requested" && role === "giver") {
+    return (
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          onClick={onDecline}
+          className="h-11 rounded-2xl px-5"
+        >
+          Отклонить
+        </Button>
+        <Button
+          type="button"
+          disabled={pending}
+          onClick={onAgree}
+          className="h-11 rounded-2xl px-5"
+        >
+          Принять
+        </Button>
+      </div>
+    );
+  }
+
+  if (exchange.status === "requested" && role === "receiver") {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        disabled={pending}
+        onClick={onCancel}
+        className="h-11 rounded-2xl px-5"
+      >
+        Отменить заявку
+      </Button>
+    );
+  }
+
+  if (exchange.status !== "agreed") return null;
+
+  if (!role) return null;
+
+  const marked =
+    role === "giver"
+      ? exchange.giver_confirmed_at
+      : exchange.receiver_confirmed_at;
+
+  return (
+    <div className="flex flex-col items-end gap-2">
+      {marked ? (
+        <p className="text-muted-foreground max-w-64 text-right text-[13px] leading-5">
+          Вы отметили передачу. Ожидается отметка собеседника.
+        </p>
+      ) : (
+        <Button
+          type="button"
+          disabled={pending}
+          onClick={onAskConfirm}
+          className="h-11 rounded-2xl px-5"
+        >
+          <Check />
+          Отметить передачу
+        </Button>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        disabled={pending}
+        onClick={onCancel}
+        className="h-11 rounded-2xl px-5"
+      >
+        Отменить сделку
+      </Button>
     </div>
   );
 }
