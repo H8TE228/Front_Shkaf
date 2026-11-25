@@ -121,6 +121,8 @@ export type TExchange = components["schemas"]["Exchange"];
 export type TPaginatedExchangeList =
   components["schemas"]["PaginatedExchangeList"];
 export type TExchangeStatus = components["schemas"]["ExchangeStatusEnum"];
+export type TExchangesQueryParams =
+  operations["exchanges_list"]["parameters"]["query"];
 
 export type TReview = components["schemas"]["Review"];
 export type TReviewCreateRequest = {
