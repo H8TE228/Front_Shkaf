@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useExchangePoints } from "@/hooks";
+import { useYandexMaps } from "@/hooks/use-yandex-maps";
+import { OpenStreetMap } from "../points/open-street-map";
 import { getCurrentDay } from "@/lib";
 import { getSavedCoordinates } from "@/lib/get-saved-coords";
 import {
@@ -104,28 +106,11 @@ function CollectionMap({
   points: TExchangePoint[];
   center: [number, number];
 }) {
-  const [maps, setMaps] = useState<typeof import("@/lib/ymaps3") | null>(null);
-  const [failed, setFailed] = useState(false);
+  const maps = useYandexMaps();
 
-  useEffect(() => {
-    let active = true;
-    import("@/lib/ymaps3")
-      .then((module) => {
-        if (active) setMaps(module);
-      })
-      .catch(() => {
-        if (active) setFailed(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (failed) {
+  if (maps === null) {
     return (
-      <p className="text-muted-foreground grid h-full place-items-center px-6 text-center text-sm">
-        Не удалось загрузить карту
-      </p>
+      <OpenStreetMap points={points} center={center} zoom={10} onSelect={openCollectionPointMap} />
     );
   }
 
@@ -164,6 +149,13 @@ function CollectionMapView({
   );
 }
 
+function openCollectionPointMap(point: TExchangePoint) {
+  const { longitude, latitude } = point.address;
+  const url = new URL("https://yandex.ru/maps/");
+  url.search = new URLSearchParams({ pt: `${longitude},${latitude}`, z: "16", l: "map" }).toString();
+  window.open(url.toString(), "_blank", "noopener,noreferrer");
+}
+
 function CollectionMarker({
   maps,
   point,
@@ -174,17 +166,11 @@ function CollectionMarker({
   index: number;
 }) {
   const { longitude, latitude } = point.address;
-  const yandexMapsUrl = new URL("https://yandex.ru/maps/");
-  yandexMapsUrl.searchParams.set("pt", `${longitude},${latitude}`);
-  yandexMapsUrl.searchParams.set("z", "16");
-  yandexMapsUrl.searchParams.set("l", "map");
 
   return (
     <maps.YMapMarker
       coordinates={maps.reactify.useDefault([longitude, latitude])}
-      onClick={() =>
-        window.open(yandexMapsUrl.toString(), "_blank", "noopener,noreferrer")
-      }
+      onClick={() => openCollectionPointMap(point)}
     >
       <div
         className="bg-primary text-primary-foreground flex size-8 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-[#00ff15] text-sm font-semibold shadow-lg"

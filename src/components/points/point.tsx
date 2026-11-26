@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Camera,
@@ -10,6 +10,7 @@ import {
   Repeat2,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { OpenStreetMap } from "./open-street-map";
 import {
   useBookmarks,
   useCreateExchangePointBookmark,
@@ -18,6 +19,7 @@ import {
   useMe,
 } from "@/hooks";
 import { getCurrentDay } from "@/lib";
+import { useYandexMaps } from "@/hooks/use-yandex-maps";
 import type { TExchangePoint } from "@/types";
 
 const pointFormatTitle = {
@@ -344,33 +346,19 @@ function PointDetails({ point }: { point: TExchangePoint }) {
 }
 
 function PointPreviewMap({ point }: { point: TExchangePoint }) {
-  const [maps, setMaps] = useState<typeof import("@/lib/ymaps3") | null>(null);
-  const [failed, setFailed] = useState(false);
+  const maps = useYandexMaps();
   const { longitude, latitude } = point.address;
-  const hasCoords = Number.isFinite(longitude) && Number.isFinite(latitude);
-
-  useEffect(() => {
-    let active = true;
-    import("@/lib/ymaps3")
-      .then((module) => {
-        if (active) setMaps(module);
-      })
-      .catch(() => {
-        if (active) setFailed(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (!hasCoords || failed) {
+  if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
     return (
       <p className="text-muted-foreground grid h-full min-h-42 place-items-center px-6 text-center text-sm">
-        Не удалось загрузить карту
+        Координаты пункта не указаны
       </p>
     );
   }
 
+  if (maps === null) {
+    return <OpenStreetMap points={[point]} center={[longitude, latitude]} zoom={16} selectedId={point.id} />;
+  }
   if (!maps) return <div className="min-h-42" />;
 
   return <PointPreviewMapView maps={maps} point={point} />;
