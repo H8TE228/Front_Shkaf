@@ -1,16 +1,16 @@
 import { MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { getCityFromCoordinates } from "@/lib";
 import {
   STORAGE_KEY_LOCATION,
-  STORAGE_KEY_LOCATION_ATTEMPTED,
   STORAGE_KEY_USER_LOCATION_UPDATED_EVENT,
 } from "@/constants";
 import type { TLocationData } from "@/types";
 
 export function LocationButton() {
   const [isLoading, setIsLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const [location, setLocation] = useState<TLocationData | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_LOCATION);
@@ -21,59 +21,46 @@ export function LocationButton() {
     }
   });
 
-  useEffect(() => {
-    const alreadyAttempted = localStorage.getItem(
-      STORAGE_KEY_LOCATION_ATTEMPTED,
-    );
-
-    if (!location && !alreadyAttempted) {
-      localStorage.setItem(STORAGE_KEY_LOCATION_ATTEMPTED, "true");
-      handleGetLocation();
-    }
-  }, [location]);
-
   function handleGetLocation() {
     if (!navigator.geolocation) {
-      console.error("Геолокация не поддерживается браузером");
+      setLocationError("Геолокация недоступна");
       return;
     }
 
-    setIsLoading(true);
+    function saveLocation(next: TLocationData) {
+      setLocation(next);
+      localStorage.setItem(STORAGE_KEY_LOCATION, JSON.stringify(next));
+      window.dispatchEvent(new Event(STORAGE_KEY_USER_LOCATION_UPDATED_EVENT));
+    }
 
+    setLocationError("");
+    setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
-          const { latitude, longitude } = coords;
-
-          const city = await getCityFromCoordinates({
-            longitude,
-            latitude,
-          });
-
-          const newLocation: TLocationData = {
-            longitude,
-            latitude,
-            city: city ?? "Неизвестный город",
+          const coordinates = {
+            longitude: coords.longitude,
+            latitude: coords.latitude,
           };
+          saveLocation({ ...coordinates, city: "" });
 
-          setLocation(newLocation);
-
-          localStorage.setItem(
-            STORAGE_KEY_LOCATION,
-            JSON.stringify(newLocation),
-          );
-
-          window.dispatchEvent(
-            new Event(STORAGE_KEY_USER_LOCATION_UPDATED_EVENT),
-          );
+          const city = await getCityFromCoordinates(coordinates);
+          if (city) saveLocation({ ...coordinates, city });
         } catch (error) {
-          console.error("Не удалось определить город:", error);
+          console.warn(
+            "Не удалось сохранить геопозицию или определить город:",
+            error,
+          );
         } finally {
           setIsLoading(false);
         }
       },
       (error) => {
-        console.error("Не удалось получить геолокацию:", error.message);
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? "Разрешите геолокацию"
+            : "Повторить определение",
+        );
         setIsLoading(false);
       },
       {
@@ -84,6 +71,10 @@ export function LocationButton() {
     );
   }
 
+  const city = location?.city === "Неизвестный город" ? "" : location?.city;
+  const locationLabel =
+    city || (location ? "Геопозиция определена" : "Определить город");
+
   return (
     <div>
       <Button
@@ -93,12 +84,8 @@ export function LocationButton() {
         className="text-foreground hover:text-foreground/80 h-10 shrink-0 cursor-pointer items-center justify-start gap-2 rounded-xl bg-transparent px-2 text-sm hover:bg-transparent sm:px-4 lg:flex"
       >
         <MapPin className="size-6" />
-        <span>
-          {isLoading
-            ? "Определяем..."
-            : location
-              ? location.city
-              : "Определить город"}
+        <span aria-live="polite">
+          {isLoading ? "Определяем..." : locationError || locationLabel}
         </span>
       </Button>
     </div>

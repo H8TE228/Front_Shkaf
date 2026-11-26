@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronRight, MapPin, Search } from "lucide-react";
 import { Button } from "../ui/button";
+import { OpenStreetMap } from "./open-street-map";
 import { useExchangePoints, useItemTypes } from "@/hooks";
+import { useYandexMaps } from "@/hooks/use-yandex-maps";
 import { getCurrentDay } from "@/lib";
 import { getSavedCoordinates } from "@/lib/get-saved-coords";
 import {
@@ -346,6 +348,7 @@ export function Points() {
               points={points}
               selectedId={selected?.id}
               center={mapCenter}
+              userLocation={savedCenter}
               onSelect={setSelectedId}
             />
           </div>
@@ -371,53 +374,30 @@ export function Points() {
   );
 }
 
-function PointsMap({
-  points,
-  selectedId,
-  center,
-  onSelect,
-}: {
+type PointsMapProps = {
   points: TExchangePoint[];
   selectedId?: number;
   center: [number, number];
+  userLocation: [number, number] | null;
   onSelect: (id: number) => void;
-}) {
-  const [maps, setMaps] = useState<typeof import("@/lib/ymaps3") | null>(null);
-  const [failed, setFailed] = useState(false);
+};
 
-  useEffect(() => {
-    let active = true;
-    import("@/lib/ymaps3")
-      .then((module) => {
-        if (active) setMaps(module);
-      })
-      .catch(() => {
-        if (active) setFailed(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+function PointsMap(props: PointsMapProps) {
+  const maps = useYandexMaps();
 
-  if (failed) {
+  if (maps === null) {
     return (
-      <p className="text-muted-foreground grid h-full place-items-center px-6 text-center text-sm">
-        Не удалось загрузить карту
-      </p>
+      <OpenStreetMap
+        {...props}
+        zoom={12}
+        onSelect={(point) => props.onSelect(point.id)}
+      />
     );
   }
 
   if (!maps) return null;
 
-  return (
-    <PointsMapView
-      maps={maps}
-      points={points}
-      selectedId={selectedId}
-      center={center}
-      onSelect={onSelect}
-    />
-  );
+  return <PointsMapView maps={maps} {...props} />;
 }
 
 function PointsMapView({
@@ -425,13 +405,10 @@ function PointsMapView({
   points,
   selectedId,
   center,
+  userLocation,
   onSelect,
-}: {
+}: PointsMapProps & {
   maps: typeof import("@/lib/ymaps3");
-  points: TExchangePoint[];
-  selectedId?: number;
-  center: [number, number];
-  onSelect: (id: number) => void;
 }) {
   const location = maps.reactify.useDefault(
     {
@@ -441,6 +418,10 @@ function PointsMapView({
     },
     [center],
   );
+  const userCoordinates = maps.reactify.useDefault(userLocation ?? center, [
+    userLocation,
+    center,
+  ]);
 
   return (
     <maps.YMap location={location} className="size-full">
@@ -455,6 +436,16 @@ function PointsMapView({
           onSelect={onSelect}
         />
       ))}
+      {userLocation && (
+        <maps.YMapMarker coordinates={userCoordinates} zIndex={10}>
+          <span
+            role="img"
+            aria-label="Ваше местоположение"
+            title="Ваше местоположение"
+            className="block size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-blue-600 shadow"
+          />
+        </maps.YMapMarker>
+      )}
     </maps.YMap>
   );
 }
