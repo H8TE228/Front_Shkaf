@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, Package } from "lucide-react";
-import { useItems, useReviews, useUserRating, useUsers } from "@/hooks";
+import { useItems, useReviews, useUser } from "@/hooks";
 import { formatDayMonth, personName, reviewsDative } from "../profile/format";
 import { MediaCover } from "../profile/media-cover";
 import { UserAvatar } from "../profile/user-avatar";
@@ -9,20 +9,19 @@ import { Stars } from "./stars";
 
 export function UserProfile({ id }: { id: string }) {
   const [tab, setTab] = useState<"reviews" | "items">("reviews");
-  const users = useUsers();
-  const rating = useUserRating(id);
-  const reviews = useReviews({ target_user: Number(id) });
-  const items = useItems();
-  const user = users.data?.results.find((entry) => String(entry.id) === id);
+  const userQuery = useUser(id);
+  const reviews = useReviews({ target_user: Number(id), page_size: 100 });
+  const items = useItems(
+    id ? { owner_id: Number(id), page_size: 100 } : undefined,
+  );
+  const user = userQuery.data;
   const name = user ? personName(user) : "";
   const title = name ? `Профиль ${name}` : "Профиль";
-  const ownItems = (items.data?.results ?? []).filter(
-    (item) => String(item.owner_id) === id,
-  );
-  const reviewCount = reviews.data?.length ?? rating.data?.count ?? 0;
-  const average = rating.data?.average;
+  const ownItems = items.data?.results ?? [];
+  const reviewCount = user?.rating.count ?? 0;
+  const average = user?.rating.average ?? null;
 
-  if (users.isLoading || rating.isLoading || reviews.isLoading) {
+  if (userQuery.isLoading) {
     return (
       <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
         <span>Загрузка...</span>
@@ -30,7 +29,7 @@ export function UserProfile({ id }: { id: string }) {
     );
   }
 
-  if (reviews.isError && users.isError) {
+  if (userQuery.isError || !user) {
     return (
       <section className="mx-auto w-full max-w-[1550px] px-6 pt-12 lg:px-0">
         <span>Ошибка загрузки данных</span>
@@ -63,32 +62,49 @@ export function UserProfile({ id }: { id: string }) {
       <section className="mx-auto grid w-full max-w-[1550px] items-start gap-6 px-6 pb-12 lg:grid-cols-[278px_minmax(0,1fr)] lg:px-0">
         <aside className="border-border bg-card grid gap-4 rounded-2xl border p-6">
           <div className="flex items-center gap-3.5">
-            <UserAvatar
-              src={user?.avatar}
-              name={name}
-              className="size-16 text-xl"
-            />
-            {name && <span className="text-lg font-semibold">{name}</span>}
-          </div>
-          {average != null && reviewCount > 0 && (
-            <div>
-              <div className="flex items-end gap-2.5">
-                <span className="text-4xl leading-none font-semibold tracking-tight">
-                  {new Intl.NumberFormat("ru", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  }).format(average)}
-                </span>
-                <Stars value={average} />
-              </div>
-              <p className="text-muted-foreground mt-1.5 text-sm">
-                из 5 по {reviewCount} {reviewsDative(reviewCount)}
+            {user.avatar || name ? (
+              <UserAvatar
+                src={user.avatar}
+                name={name}
+                className="size-16 text-xl"
+              />
+            ) : (
+              <span className="bg-muted size-16 shrink-0 rounded-full" />
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-lg font-semibold">
+                {name || "Пользователь"}
               </p>
+              {user.city.trim() && (
+                <p className="text-muted-foreground truncate text-sm">
+                  {user.city}
+                </p>
+              )}
             </div>
-          )}
-          {reviewCount === 0 && (
-            <p className="text-muted-foreground text-sm">Пока нет отзывов</p>
-          )}
+          </div>
+          <div className="border-border grid gap-2 border-t pt-4">
+            {reviewCount > 0 && average != null ? (
+              <>
+                <div className="flex items-end gap-2.5">
+                  <span className="text-4xl leading-none font-semibold tracking-tight">
+                    {new Intl.NumberFormat("ru", {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                    }).format(average)}
+                  </span>
+                  <Stars value={average} />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  из 5 по {reviewCount} {reviewsDative(reviewCount)}
+                </p>
+              </>
+            ) : (
+              <>
+                <Stars value={0} />
+                <p className="text-muted-foreground text-sm">Пока нет отзывов</p>
+              </>
+            )}
+          </div>
         </aside>
 
         <div className="min-w-0">
@@ -96,7 +112,7 @@ export function UserProfile({ id }: { id: string }) {
             {(
               [
                 ["reviews", "Отзывы", reviewCount],
-                ["items", "Объявления", ownItems.length],
+                ["items", "Объявления", items.isSuccess ? ownItems.length : 0],
               ] as const
             ).map(([id, label, count]) => (
               <button
@@ -116,15 +132,22 @@ export function UserProfile({ id }: { id: string }) {
             ))}
           </div>
 
+          {tab === "reviews" && reviews.isLoading && <span>Загрузка...</span>}
           {tab === "reviews" && reviews.isError && (
             <span>Ошибка загрузки данных</span>
           )}
-          {tab === "reviews" && !reviews.isError && !reviews.data?.length && (
+          {tab === "reviews" &&
+            !reviews.isLoading &&
+            !reviews.isError &&
+            !reviews.data?.length && (
             <div className="border-border bg-card rounded-2xl border px-6 py-16 text-center">
               <h2 className="text-lg font-semibold">Пока нет отзывов</h2>
             </div>
           )}
-          {tab === "reviews" && !reviews.isError && !!reviews.data?.length && (
+          {tab === "reviews" &&
+            !reviews.isLoading &&
+            !reviews.isError &&
+            !!reviews.data?.length && (
             <div className="grid gap-3">
               {reviews.data.map((review) => {
                 const author = personName(review.author);

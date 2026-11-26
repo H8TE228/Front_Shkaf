@@ -1,9 +1,19 @@
-import type { TRating, TPaginatedUserList, TUser } from "@/types";
+import type {
+  TPaginatedUserList,
+  TPublicUser,
+  TRating,
+  TUser,
+} from "@/types";
 import { api } from "..";
 
 export const usersQueries = {
   getUsers: async () => {
     const res = await api.get<TPaginatedUserList>("/users");
+    return res.data;
+  },
+
+  getUser: async (id: string) => {
+    const res = await api.get<TPublicUser>(`/users/${id}`);
     return res.data;
   },
 

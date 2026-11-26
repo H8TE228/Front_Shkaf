@@ -1,10 +1,15 @@
-import type { TReview, TReviewCreateRequest, TReviewsQueryParams } from "@/types";
+import type {
+  TPaginatedReviewList,
+  TReview,
+  TReviewCreateRequest,
+  TReviewsQueryParams,
+} from "@/types";
 import { api } from "../api";
 
 export const reviewsQueries = {
   getReviews: async (params?: TReviewsQueryParams) => {
-    const res = await api.get<TReview[]>("/reviews", { params });
-    return res.data;
+    const res = await api.get<TPaginatedReviewList>("/reviews", { params });
+    return res.data.results;
   },
 
   createReview: async (data: TReviewCreateRequest) => {

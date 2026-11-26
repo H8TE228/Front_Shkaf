@@ -103,7 +103,9 @@ function formatStamp(value: string) {
 
 export function Chats() {
   const { data: user } = useMe();
-  const { data: conversationPage, isLoading, isError } = useConversations();
+  const { data: conversationPage, isLoading, isError } = useConversations({
+    refetchInterval: 5000,
+  });
   const conversations = conversationPage?.results;
   const { data: completedPage } = useExchanges({
     status: "completed",
@@ -122,7 +124,7 @@ export function Chats() {
     data: messages,
     isLoading: messagesLoading,
     isError: messagesError,
-  } = useConversationMessages(activeId);
+  } = useConversationMessages(activeId, { refetchInterval: 5000 });
 
   const conversation = conversations?.find(
     (entry) => String(entry.id) === activeId,

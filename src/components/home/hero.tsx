@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { useMobileSearch } from "@/hooks";
 import { Button } from "../ui/button";
 
 export function Hero() {
+  const navigate = useNavigate();
   const { openMobileSearchModal } = useMobileSearch();
 
   return (
@@ -15,6 +17,7 @@ export function Hero() {
         <div className="relative z-10 min-w-0">
           <Button
             type="button"
+            onClick={() => navigate("/items/new")}
             className="dark:text-foreground absolute bottom-2 left-1/2 h-11 w-[calc(100%-0.5rem)] -translate-x-1/2 text-sm font-semibold md:bottom-8 md:h-12 md:w-70 md:text-base dark:bg-[#0e6f73] dark:hover:bg-[#0e6f73]/80"
           >
             Отдать вещь

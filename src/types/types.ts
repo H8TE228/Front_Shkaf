@@ -12,6 +12,7 @@ export type TLocationData = {
 };
 
 export type TUser = components["schemas"]["User"];
+export type TPublicUser = components["schemas"]["PublicUser"];
 export type TLoginRequest = components["schemas"]["CustomTokenObtainPair"];
 export type TRegisterRequest = Omit<
   components["schemas"]["Register"],
@@ -134,7 +135,10 @@ export type TReviewsQueryParams = {
   author?: number;
   rating?: number;
   target_user?: number;
+  page?: number;
+  page_size?: number;
 };
+export type TPaginatedReviewList = components["schemas"]["PaginatedReviewList"];
 
 export type TRating = components["schemas"]["Rating"];
 

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight, Feather, Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { useExchanges } from "@/hooks";
@@ -7,6 +7,7 @@ import { exchangeMoment, exchangeStatusLabel, formatDayMonth } from "./format";
 import { MediaCover } from "./media-cover";
 
 export function ProfileOverview({ onHistory }: { onHistory: () => void }) {
+  const navigate = useNavigate();
   const { data: exchangePage, isLoading, isError } = useExchanges();
   const exchanges = exchangePage?.results ?? [];
   const latest = [...exchanges].sort(
@@ -37,7 +38,11 @@ export function ProfileOverview({ onHistory }: { onHistory: () => void }) {
             </p>
           )}
         </div>
-        <Button type="button" className="h-11 rounded-xl px-5 font-semibold">
+        <Button
+          type="button"
+          onClick={() => navigate("/items/new")}
+          className="h-11 rounded-xl px-5 font-semibold"
+        >
           <Plus /> Отдать вещь
         </Button>
       </section>

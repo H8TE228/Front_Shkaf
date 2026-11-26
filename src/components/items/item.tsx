@@ -27,6 +27,7 @@ import {
 } from "../ui/carousel";
 import { ItemCard } from "../item-card";
 import { UserAvatar } from "../profile/user-avatar";
+import { personName } from "../profile/format";
 import {
   useBookmarks,
   useCreateConversation,
@@ -36,9 +37,9 @@ import {
   useItemExchanges,
   useItems,
   useMe,
-  useUsers,
+  useUser,
 } from "@/hooks";
-import type { TItem, TItemPhoto, TUser } from "@/types";
+import type { TItem, TItemPhoto, TPublicUser } from "@/types";
 import { ItemOwnerActions } from "./edit-item-form";
 
 const exchangeFormatTitle = {
@@ -52,15 +53,6 @@ const conditionTitle = {
   good: "Хорошее",
   used: "Б/у",
 } as const;
-
-function personName(person: {
-  first_name?: string | null;
-  username?: string | null;
-}) {
-  const first = person.first_name?.trim();
-  if (first) return first;
-  return person.username?.trim() ?? "";
-}
 
 function hasCoordinates(item: TItem) {
   return (
@@ -133,7 +125,6 @@ export function Item() {
   const { data: item, isLoading, isError } = useItemById(id ?? "");
   const { data: items } = useItems();
   const itemsData = items?.results;
-  const { data: users, isError: usersError } = useUsers();
   const { data: bookmarks } = useBookmarks({ type: "item" });
   const bookmarksData = bookmarks?.results;
   const { mutate: createBookmark, isPending: createPending } =
@@ -158,8 +149,10 @@ export function Item() {
   );
   const showWrite = !dealLocked || inDeal;
   const ready = !isLoading && !isError && !!item;
-  const owner = users?.results.find((entry) => entry.id === item?.owner_id);
-  const ownerName = !usersError && owner ? personName(owner) : "";
+  const { data: owner, isError: ownerError, isSuccess: ownerLoaded } = useUser(
+    item ? String(item.owner_id) : "",
+  );
+  const ownerName = owner ? personName(owner) : "";
   const similar = (itemsData ?? [])
     .filter(
       (entry) => entry.id !== item?.id && entry.item_type === item?.item_type,
@@ -332,8 +325,9 @@ export function Item() {
       {ready && (
         <ItemDetails
           item={item}
-          owner={usersError ? undefined : owner}
+          owner={owner}
           ownerName={ownerName}
+          ownerUnresolved={ownerError || (ownerLoaded && !ownerName)}
           isOwner={isOwner}
           showWrite={showWrite}
           meLoading={meLoading}
@@ -364,6 +358,7 @@ function ItemDetails({
   item,
   owner,
   ownerName,
+  ownerUnresolved,
   isOwner,
   showWrite,
   meLoading,
@@ -375,8 +370,9 @@ function ItemDetails({
   onShare,
 }: {
   item: TItem;
-  owner?: TUser;
+  owner?: TPublicUser;
   ownerName: string;
+  ownerUnresolved: boolean;
   isOwner: boolean;
   showWrite: boolean;
   meLoading: boolean;
@@ -460,13 +456,11 @@ function ItemDetails({
               <span className="bg-muted size-12 shrink-0 rounded-full" />
             )}
             <div className="min-w-0">
-              {ownerName ||
-                (owner?.username && (
-                  <p className="truncate font-semibold">
-                    {ownerName || owner.username}
-                  </p>
-                )) ||
-                "Имя не загружено"}
+              {ownerName ? (
+                <p className="truncate font-semibold">{ownerName}</p>
+              ) : (
+                ownerUnresolved && "Имя не загружено"
+              )}
               <p className="text-muted-foreground text-sm leading-5">
                 Владелец вещи
               </p>
